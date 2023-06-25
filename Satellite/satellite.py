@@ -30,20 +30,34 @@ class SatelliteInfo:
                 self.satellite_longitude = satellite["lng"]
                 self.satellite_altitude = satellite["alt"]
 
-    def detect_obj(self):
+    def detect_obj(self,location):
         # TODO: grpc发送请求，获取目标物位置
-        self.obj_latitude = 27.0
-        self.obj_longitude = -56
-        self.obj_altitude = 1.0
+        print("detect obj: ", location)
+        if location:
+            self.obj_latitude = location.lat
+            self.obj_longitude = location.lng
+            self.obj_altitude = location.alt
+        else:
+            self.obj_latitude = 0.0
+            self.obj_longitude = 0.0
+            self.obj_altitude = 0.0
+        # self.obj_latitude = 27.0
+        # self.obj_longitude = -56
+        # self.obj_altitude = 1.0
+
+    def set_pos(self,pos):
+        self.obj_latitude = pos.lat
+        self.obj_longitude = pos.lng
+        self.obj_altitude = pos.alt
 
     def get_satellite_info(self):
         self.fetch_data()
-        return self.satellite
+        return self.satellite, self.stamp
 
     # 计算偏角, 返回角度
     def calculate_azimuth(self):
         self.fetch_data()  # 获取最新的卫星数据
-        self.detect_obj()  # 检测目标物位置
+        # self.detect_obj()  # 检测目标物位置
 
         time_converter = TimeConverter(datetime.datetime.now())
 
