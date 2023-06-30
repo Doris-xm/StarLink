@@ -22,6 +22,7 @@ import grpc
 import helloworld_pb2
 import helloworld_pb2_grpc
 from satellite import SatelliteInfo
+import time
 
 def generate_request():
     satellite = SatelliteInfo(25544)
@@ -36,26 +37,29 @@ def generate_request():
     sat_position.alt = 100.0
     sat_position.lat = 27.0
     sat_position.lng = 15.0
+    sat_position.target_name = "test"
     request.sat_position.CopyFrom(sat_position)
 
     # Set target_position (repeated field)
     target_positions = [
-        helloworld_pb2.PositionInfo(timestamp=str(stamp + 1), alt=100.0, lat=27.0, lng=15.0),
-        helloworld_pb2.PositionInfo(timestamp=str(stamp + 2), alt=200.0, lat=28.0, lng=16.0),
+        helloworld_pb2.PositionInfo(timestamp=str(int(time.time()+30)), alt=100.0, lat=27.0, lng=15.0, target_name="test"),
+        helloworld_pb2.PositionInfo(timestamp=str(int(time.time()+30)), alt=200.0, lat=28.0, lng=16.0, target_name="test"),
+        helloworld_pb2.PositionInfo(timestamp=str(int(time.time()+30)), alt=200.0, lat=28.0, lng=16.0, target_name="test"),
+        helloworld_pb2.PositionInfo(timestamp=str(int(time.time()+30)), alt=200.0, lat=28.0, lng=16.0, target_name="test"),
     ]
     request.target_position.extend(target_positions)
 
     # Set find_target
     request.find_target = True
 
-    print(request)
+    # print(request)
     return request
 
 
 def generate_requests():
     requests = [
         generate_request(),
-        generate_request()
+        # generate_request()
     ]
     for request in requests:
         yield request
@@ -71,22 +75,30 @@ def run():
                        ('grpc.keepalive_permit_without_calls', 1),
                        ('grpc.initial_reconnect_backoff_ms', 5000)  # 设置初始重连等待时间为5秒
                        ]
-    with grpc.insecure_channel("43.142.83.201:8081", options=channel_options) as channel:
+    with grpc.insecure_channel("43.142.83.201:50051", options=channel_options) as channel:
+    # with grpc.insecure_channel("localhost:50051", options=channel_options) as channel:
         stub = helloworld_pb2_grpc.SatComStub(channel)
-        requests = generate_requests()
-        # Set target_position (repeated field)
+        while True:
+            try:
+                #发送位置请求
+                request = generate_requests()
+                response = stub.CommuWizSat(request)
+                print(response.code())
 
-        response = stub.CommuWizSat(requests)
-        for i in range(60):
-            print(f"{i} seconds paased.")
-            # if response.status == 200
-            #     break
-            sleep(1)
-    print("Satellite client received: ")
-    print(response)
-    satellite = SatelliteInfo(25544)
-    satellite.detect_obj(generate_request().target_position[0])
-    print(satellite.calculate_azimuth())
+
+                #处理响应
+                print("Satellite client received: ")
+                # print(response)
+                satellite = SatelliteInfo(25544)
+                satellite.detect_obj(generate_request().target_position[0])
+                print(satellite.calculate_azimuth())
+
+                # 休眠一段时间
+                # sleep(1)
+            except grpc.RpcError as e:
+                print(e)
+                sleep(1)
+                continue
 
 
 if __name__ == "__main__":

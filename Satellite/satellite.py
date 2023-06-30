@@ -32,7 +32,7 @@ class SatelliteInfo:
 
     def detect_obj(self,location):
         # TODO: grpc发送请求，获取目标物位置
-        print("detect obj: ", location)
+        # print("detect obj: ", location)
         if location:
             self.obj_latitude = location.lat
             self.obj_longitude = location.lng

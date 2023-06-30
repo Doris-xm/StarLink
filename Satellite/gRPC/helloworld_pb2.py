@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10helloworld.proto\x12\x05\x63ommu\"H\n\x0cPositionInfo\x12\x11\n\ttimestamp\x18\x01 \x01(\t\x12\x0b\n\x03\x61lt\x18\x02 \x01(\x02\x12\x0b\n\x03lat\x18\x03 \x01(\x02\x12\x0b\n\x03lng\x18\x04 \x01(\x02\"L\n\rSatelliteInfo\x12\x10\n\x08sat_name\x18\x01 \x01(\t\x12)\n\x0csat_position\x18\x02 \x01(\x0b\x32\x13.commu.PositionInfo\"\x8e\x01\n\x0cSat2BaseInfo\x12\x10\n\x08sat_name\x18\x01 \x01(\t\x12)\n\x0csat_position\x18\x02 \x01(\x0b\x32\x13.commu.PositionInfo\x12\x13\n\x0b\x66ind_target\x18\x03 \x01(\x08\x12,\n\x0ftarget_position\x18\x04 \x03(\x0b\x32\x13.commu.PositionInfo\"}\n\x0c\x42\x61se2SatInfo\x12*\n\rbase_position\x18\x01 \x01(\x0b\x32\x13.commu.PositionInfo\x12\x13\n\x0b\x66ind_target\x18\x02 \x01(\x08\x12,\n\x0ftarget_position\x18\x03 \x03(\x0b\x32\x13.commu.PositionInfo\"\x1d\n\x0eUnity2BaseInfo\x12\x0b\n\x03msg\x18\x01 \x01(\t\"\\\n\x17Unity2BaseInfo_template\x12\x13\n\x0b\x66ind_target\x18\x01 \x01(\x08\x12,\n\x0ftarget_position\x18\x02 \x03(\x0b\x32\x13.commu.PositionInfo\"\x7f\n\x0e\x42\x61se2UnityInfo\x12\x13\n\x0b\x66ind_target\x18\x01 \x01(\x08\x12,\n\x0ftarget_position\x18\x02 \x03(\x0b\x32\x13.commu.PositionInfo\x12*\n\x0ctracking_sat\x18\x03 \x03(\x0b\x32\x14.commu.SatelliteInfo2\xdc\x01\n\x06SatCom\x12;\n\x0b\x43ommuWizSat\x12\x13.commu.Sat2BaseInfo\x1a\x13.commu.Base2SatInfo(\x01\x30\x01\x12V\n\x19ReceiveFromUnity_template\x12\x1e.commu.Unity2BaseInfo_template\x1a\x15.commu.Base2UnityInfo(\x01\x30\x01\x12=\n\x0bSendToUnity\x12\x15.commu.Base2UnityInfo\x1a\x15.commu.Unity2BaseInfo(\x01\x42\rZ\x0bstarlink/pbb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10helloworld.proto\x12\x05\x63ommu\"]\n\x0cPositionInfo\x12\x11\n\ttimestamp\x18\x01 \x01(\t\x12\x0b\n\x03\x61lt\x18\x02 \x01(\x02\x12\x0b\n\x03lat\x18\x03 \x01(\x02\x12\x0b\n\x03lng\x18\x04 \x01(\x02\x12\x13\n\x0btarget_name\x18\x05 \x01(\t\"L\n\rSatelliteInfo\x12\x10\n\x08sat_name\x18\x01 \x01(\t\x12)\n\x0csat_position\x18\x02 \x01(\x0b\x32\x13.commu.PositionInfo\"\x8e\x01\n\x0cSat2BaseInfo\x12\x10\n\x08sat_name\x18\x01 \x01(\t\x12)\n\x0csat_position\x18\x02 \x01(\x0b\x32\x13.commu.PositionInfo\x12\x13\n\x0b\x66ind_target\x18\x03 \x01(\x08\x12,\n\x0ftarget_position\x18\x04 \x03(\x0b\x32\x13.commu.PositionInfo\"}\n\x0c\x42\x61se2SatInfo\x12*\n\rbase_position\x18\x01 \x01(\x0b\x32\x13.commu.PositionInfo\x12\x13\n\x0b\x66ind_target\x18\x02 \x01(\x08\x12,\n\x0ftarget_position\x18\x03 \x03(\x0b\x32\x13.commu.PositionInfo\"\x1d\n\x0eUnity2BaseInfo\x12\x0b\n\x03msg\x18\x01 \x01(\t\"\\\n\x17Unity2BaseInfo_template\x12\x13\n\x0b\x66ind_target\x18\x01 \x01(\x08\x12,\n\x0ftarget_position\x18\x02 \x03(\x0b\x32\x13.commu.PositionInfo\"\x7f\n\x0e\x42\x61se2UnityInfo\x12\x13\n\x0b\x66ind_target\x18\x01 \x01(\x08\x12,\n\x0ftarget_position\x18\x02 \x03(\x0b\x32\x13.commu.PositionInfo\x12*\n\x0ctracking_sat\x18\x03 \x03(\x0b\x32\x14.commu.SatelliteInfo2\xdc\x01\n\x06SatCom\x12;\n\x0b\x43ommuWizSat\x12\x13.commu.Sat2BaseInfo\x1a\x13.commu.Base2SatInfo(\x01\x30\x01\x12V\n\x19ReceiveFromUnity_template\x12\x1e.commu.Unity2BaseInfo_template\x1a\x15.commu.Base2UnityInfo(\x01\x30\x01\x12=\n\x0bSendToUnity\x12\x15.commu.Base2UnityInfo\x1a\x15.commu.Unity2BaseInfo(\x01\x42\rZ\x0bstarlink/pbb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -23,19 +23,19 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'Z\013starlink/pb'
   _globals['_POSITIONINFO']._serialized_start=27
-  _globals['_POSITIONINFO']._serialized_end=99
-  _globals['_SATELLITEINFO']._serialized_start=101
-  _globals['_SATELLITEINFO']._serialized_end=177
-  _globals['_SAT2BASEINFO']._serialized_start=180
-  _globals['_SAT2BASEINFO']._serialized_end=322
-  _globals['_BASE2SATINFO']._serialized_start=324
-  _globals['_BASE2SATINFO']._serialized_end=449
-  _globals['_UNITY2BASEINFO']._serialized_start=451
-  _globals['_UNITY2BASEINFO']._serialized_end=480
-  _globals['_UNITY2BASEINFO_TEMPLATE']._serialized_start=482
-  _globals['_UNITY2BASEINFO_TEMPLATE']._serialized_end=574
-  _globals['_BASE2UNITYINFO']._serialized_start=576
-  _globals['_BASE2UNITYINFO']._serialized_end=703
-  _globals['_SATCOM']._serialized_start=706
-  _globals['_SATCOM']._serialized_end=926
+  _globals['_POSITIONINFO']._serialized_end=120
+  _globals['_SATELLITEINFO']._serialized_start=122
+  _globals['_SATELLITEINFO']._serialized_end=198
+  _globals['_SAT2BASEINFO']._serialized_start=201
+  _globals['_SAT2BASEINFO']._serialized_end=343
+  _globals['_BASE2SATINFO']._serialized_start=345
+  _globals['_BASE2SATINFO']._serialized_end=470
+  _globals['_UNITY2BASEINFO']._serialized_start=472
+  _globals['_UNITY2BASEINFO']._serialized_end=501
+  _globals['_UNITY2BASEINFO_TEMPLATE']._serialized_start=503
+  _globals['_UNITY2BASEINFO_TEMPLATE']._serialized_end=595
+  _globals['_BASE2UNITYINFO']._serialized_start=597
+  _globals['_BASE2UNITYINFO']._serialized_end=724
+  _globals['_SATCOM']._serialized_start=727
+  _globals['_SATCOM']._serialized_end=947
 # @@protoc_insertion_point(module_scope)
