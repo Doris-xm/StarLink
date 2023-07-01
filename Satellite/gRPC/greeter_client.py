@@ -82,15 +82,20 @@ def run():
             try:
                 #发送位置请求
                 request = generate_requests()
-                response = stub.CommuWizSat(request)
-                print(response.code())
+                # response = stub.CommuWizSat(request)
+                # print(response.code())
+                response_iterator = stub.CommuWizSat(request)
+
+                print("Satellite client received: ")
+                for response in response_iterator:
+                    print(response)
 
 
                 #处理响应
-                print("Satellite client received: ")
                 # print(response)
                 satellite = SatelliteInfo(25544)
                 satellite.detect_obj(generate_request().target_position[0])
+                print("calculate_azimuth: ")
                 print(satellite.calculate_azimuth())
 
                 # 休眠一段时间
