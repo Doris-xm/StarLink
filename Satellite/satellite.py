@@ -3,6 +3,7 @@ import requests
 import json
 import math
 from utils.j_time import TimeConverter
+from model.TrackModel import TrackModel
 
 
 class SatelliteInfo:
@@ -17,6 +18,8 @@ class SatelliteInfo:
         self.obj_latitude = 0.0
         self.obj_longitude = 0.0
         self.obj_altitude = 0.0
+        self.obj_source_seq = []
+        self.track_model = TrackModel()
 
     def fetch_data(self):
         response = requests.get(self.url)
@@ -30,20 +33,23 @@ class SatelliteInfo:
                 self.satellite_longitude = satellite["lng"]
                 self.satellite_altitude = satellite["alt"]
 
-    def detect_obj(self,location):
-        # TODO: grpc发送请求，获取目标物位置
-        # print("detect obj: ", location)
-        if location:
-            self.obj_latitude = location.lat
-            self.obj_longitude = location.lng
-            self.obj_altitude = location.alt
-        else:
-            self.obj_latitude = 0.0
-            self.obj_longitude = 0.0
-            self.obj_altitude = 0.0
-        # self.obj_latitude = 27.0
-        # self.obj_longitude = -56
-        # self.obj_altitude = 1.0
+    def detect_obj_server(self, location_info):
+        # TODO: listen on port to get object position info
+        tracking_length = 32
+        input_length = 120
+        location_info = self.get_object_info()
+
+        self.obj_source_seq.append(location_info)
+        seq_len = len(self.obj_source_seq)
+
+        if seq_len > input_length:
+            self.obj_source_seq = self.obj_source_seq[seq_len - input_length :]
+
+        predict_result = self.track_model.predict(self.obj_source_seq, tracking_length)
+
+    def get_object_info(self):
+        # TODO: listen on port to get object position info
+        pass
 
     def set_pos(self,pos):
         self.obj_latitude = pos.lat
