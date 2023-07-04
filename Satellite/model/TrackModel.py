@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
-import Model
+from . import Model
+# import Model
 import csv
 
 n_lstm = 128
@@ -26,8 +27,9 @@ class TrackModel:
         Returns:
             pred [np.array(pred)]: The prediction of points. shape of [pred_length, 5].
         """
+        sequence = np.array(sequence)
         source_seq, max_seq_data, min_seq_data = self.preprocess(sequence)
-
+        print("predicting")
         pred = []
         decoder_length = pred_len
         encode_length = source_seq.shape[1]
@@ -56,6 +58,7 @@ class TrackModel:
         return pred_result
     
     def preprocess(self, sequence):
+        print(sequence, type(sequence))
         # normalization
         max_seq_data, min_seq_data = sequence.max(axis = 0), sequence.min(axis = 0)
         sequence = (sequence - min_seq_data) / (max_seq_data - min_seq_data)
@@ -133,7 +136,6 @@ if __name__ == '__main__':
             if point[0] == 0.0:
                 is_valid = False
                 break
-    print(seq_temp)
     
     model = TrackModel()
     model.predict(seq_temp, 20)
