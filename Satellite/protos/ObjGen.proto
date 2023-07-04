@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+service ObjGen{
+    rpc StartLoadObj(SatelliteAddr) returns (LoadResponse);
+}
+
+message SatelliteAddr {
+    int32 SatID = 1;
+    string sate_name = 2;
+    string addr = 3;
+    int32 port = 4;
+}
+
+message LoadResponse {
+  bool successful = 1;
+  int32 ObjID = 2;
+}

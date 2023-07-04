@@ -1,6 +1,5 @@
 import csv
 import datetime
-
 import numpy as np
 import requests
 import json
@@ -8,6 +7,8 @@ import math
 from utils.j_time import TimeConverter
 from model.TrackModel import TrackModel, row2array
 
+tracking_length = 32
+input_length = 120
 
 class SatelliteInfo:
     def __init__(self, satellite_id):
@@ -23,6 +24,7 @@ class SatelliteInfo:
         self.obj_altitude = 0.0
         self.obj_source_seq = []
         self.track_model = TrackModel()
+        self.predict_result = []
 
     def fetch_data(self):
         response = requests.get(self.url)
@@ -56,6 +58,17 @@ class SatelliteInfo:
         # self.obj_source_seq = np.array(self.obj_source_seq)  # 将列表转换为ndarray
         predict_result = self.track_model.predict(self.obj_source_seq, tracking_length)
         return predict_result
+
+    def set_object_info(self, objID, delta_time, delta_lng, delta_lat, sog, cog, lng, lat):
+        self.obj_source_seq.append([delta_time, delta_lng, delta_lat, sog, cog, lng, lat])
+        seq_len = len(self.obj_source_seq)
+        # if seq_len == input_length:
+        #     self.detect_obj()
+
+        if seq_len > input_length:
+            self.obj_source_seq = self.obj_source_seq[seq_len - input_length:]
+            # self.detect_obj()
+        return len(self.obj_source_seq)
 
     def get_object_info(self):
         # TODO: listen on port to get object position info
@@ -125,11 +138,12 @@ class SatelliteInfo:
         delta_longitude = longitude_rad - obj_longitude_rad
 
         x = math.cos(math.radians(self.obj_latitude)) * math.sin(math.radians(self.satellite_latitude)) - math.sin(
-            math.radians(self.obj_latitude)) * math.cos(math.radians(self.satellite_latitude)) * math.cos(
-            delta_longitude)
+            math.radians(self.obj_latitude)) * math.cos(math.radians(self.satellite_latitude)) * math.cos(delta_longitude)
         y = math.sin(delta_longitude) * math.cos(math.radians(self.satellite_latitude))
         z = math.sin(math.radians(self.obj_latitude)) * math.sin(math.radians(self.satellite_latitude)) + math.cos(
-            math.radians(self.obj_latitude)) * math.cos(math.radians(self.satellite_latitude)) * math.cos(
-            delta_longitude)
+            math.radians(self.obj_latitude)) * math.cos(math.radians(self.satellite_latitude)) * math.cos(delta_longitude)
 
         return [x, y, z]
+
+
+

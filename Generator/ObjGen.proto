@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+service ObjGen{
+    rpc StartLoadObj(SatelliteAddr) returns (LoadResponse);
+}
+
+message SatelliteAddr {
+    int32 SatID = 1;
+    string sate_name = 2;
+    string addr = 3;
+    int32 port = 4;
+}
+
+message LoadResponse {
+  bool successful = 1;
+  int32 ObjID = 2;
+}
+
+service SatServer{
+    rpc GetObjPosition(ObjPosition)  returns (ObjPosResponse);
+    rpc PredictObjTrack(ObjInfo) returns (PredictTrack);
+}
+
+message PositionInfo {
+    string timestamp = 1;
+    float alt = 2; // altitude
+    float lat = 3; // latitude
+    float lng = 4; // longitude
+    string target_name = 5;
+}
+
+message ObjPosition {
+    int32 ObjID = 1;
+    float delta_time = 2;
+    float delta_lng = 3;
+    float delta_lat = 4;
+    float sog = 5;
+    float cog = 6;
+    float lng = 7;
+    float lat = 8;
+}
+
+message TrackPoint {
+    float lng = 1;
+    float lat = 2;
+}
+
+message PredictTrack {
+    repeated TrackPoint pred_point = 1;
+}
+
+message ObjPosResponse {
+    int32 seq_len = 1;
+}
+
+message ObjInfo {
+    int32 ObjID = 1;
+}
