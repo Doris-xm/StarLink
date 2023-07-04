@@ -17,12 +17,12 @@ from concurrent import futures
 import logging
 
 import grpc
-import helloworld_pb2
-import helloworld_pb2_grpc
+from protos import SatCom_pb2_grpc
+from protos import SatCom_pb2
 # from satellite import SatelliteInfo
 
 
-class Greeter(helloworld_pb2_grpc.SatComServicer):
+class Test(SatCom_pb2_grpc.SatComServicer):
     # def SayHello(self, request, context):
     #     print(request)
     #     satellite_ = SatelliteInfo(25544)
@@ -39,20 +39,20 @@ class Greeter(helloworld_pb2_grpc.SatComServicer):
             # Generate the response message
 
             # For example, you can return a dummy response
-            response = helloworld_pb2.Base2Sat(
-                base_position=helloworld_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),
+            response = SatCom_pb2.Base2Sat(
+                base_position=SatCom_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),
                 find_target=True,
-                target_info = [ helloworld_pb2.TargetInfo(target_name="test1",
-                                                          target_position=helloworld_pb2.LLAPosition(timestamp="123", lat=27.0, lng=15.0, alt=100.0),),
-                                helloworld_pb2.TargetInfo(target_name="test2",
-                                                            target_position=helloworld_pb2.LLAPosition(timestamp="123", lat=27.0, lng=15.0, alt=100.0),),
+                target_info = [ SatCom_pb2.TargetInfo(target_name="test1",
+                                                          target_position=SatCom_pb2.LLAPosition(timestamp="123", lat=27.0, lng=15.0, alt=100.0),),
+                                SatCom_pb2.TargetInfo(target_name="test2",
+                                                            target_position=SatCom_pb2.LLAPosition(timestamp="123", lat=27.0, lng=15.0, alt=100.0),),
                                 ],
                 take_photo=True,
                 zone = [
-                    helloworld_pb2.ZoneInfo(upper_left=helloworld_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),
-                                            bottom_right=helloworld_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),),
-                    helloworld_pb2.ZoneInfo(upper_left=helloworld_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),
-                                            bottom_right=helloworld_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),),
+                    SatCom_pb2.ZoneInfo(upper_left=SatCom_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),
+                                            bottom_right=SatCom_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),),
+                    SatCom_pb2.ZoneInfo(upper_left=SatCom_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),
+                                            bottom_right=SatCom_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),),
                 ]
             )
 
@@ -63,7 +63,7 @@ class Greeter(helloworld_pb2_grpc.SatComServicer):
 def serve():
     port = "50051"
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    helloworld_pb2_grpc.add_SatComServicer_to_server(Greeter(), server)
+    SatCom_pb2_grpc.add_SatComServicer_to_server(Test(), server)
     server.add_insecure_port("[::]:" + port)
     server.start()
     print("Server started, listening on " + port)

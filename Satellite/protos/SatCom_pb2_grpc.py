@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import SatCom_pb2 as SatCom__pb2
+from . import SatCom_pb2 as SatCom__pb2
 
 
 class SatComStub(object):
@@ -15,19 +15,29 @@ class SatComStub(object):
             channel: A grpc.Channel.
         """
         self.CommuWizSat = channel.stream_stream(
-                '/SatCom/CommuWizSat',
-                request_serializer=SatCom__pb2.Sat2BaseInfo.SerializeToString,
-                response_deserializer=SatCom__pb2.Base2SatInfo.FromString,
+                '/commu.SatCom/CommuWizSat',
+                request_serializer=SatCom__pb2.SatRequest.SerializeToString,
+                response_deserializer=SatCom__pb2.Base2Sat.FromString,
+                )
+        self.TakePhotos = channel.unary_unary(
+                '/commu.SatCom/TakePhotos',
+                request_serializer=SatCom__pb2.SatPhotoRequest.SerializeToString,
+                response_deserializer=SatCom__pb2.BasePhotoReceiveResponse.FromString,
                 )
         self.ReceiveFromUnity_template = channel.stream_stream(
-                '/SatCom/ReceiveFromUnity_template',
-                request_serializer=SatCom__pb2.Unity2BaseInfo_template.SerializeToString,
-                response_deserializer=SatCom__pb2.Base2UnityInfo.FromString,
+                '/commu.SatCom/ReceiveFromUnity_template',
+                request_serializer=SatCom__pb2.UnityRequest_template.SerializeToString,
+                response_deserializer=SatCom__pb2.Base2Unity.FromString,
                 )
-        self.SendToUnity = channel.stream_unary(
-                '/SatCom/SendToUnity',
-                request_serializer=SatCom__pb2.Base2UnityInfo.SerializeToString,
-                response_deserializer=SatCom__pb2.Unity2BaseInfo.FromString,
+        self.CommuWizUnity = channel.unary_stream(
+                '/commu.SatCom/CommuWizUnity',
+                request_serializer=SatCom__pb2.UnityRequest.SerializeToString,
+                response_deserializer=SatCom__pb2.Base2Unity.FromString,
+                )
+        self.SendPhotos = channel.unary_stream(
+                '/commu.SatCom/SendPhotos',
+                request_serializer=SatCom__pb2.UnityPhotoRequest.SerializeToString,
+                response_deserializer=SatCom__pb2.BasePhotoResponse.FromString,
                 )
 
 
@@ -35,21 +45,43 @@ class SatComServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def CommuWizSat(self, request_iterator, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def ReceiveFromUnity_template(self, request_iterator, context):
-        """卫星作为client，向基站发信，两端都是流的方法
+        """satellite时刻广播自己的位置, base返回目标信息以及是否有照片请求
+        request: 卫星信息, 是否发现目标, 目标位置信息
+        response: 基站位置, 是否发现目标, 目标位置信息, 是否有拍照请求, 请求拍照区域
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def SendToUnity(self, request_iterator, context):
+    def TakePhotos(self, request, context):
+        """satellite拍摄完成后发起请求, base接受照片信息并返回是否成功接收
+        request: 时间戳, 卫星信息, 区域信息, 照片信息
+        response: 时间戳, 是否成功收到照片
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ReceiveFromUnity_template(self, request_iterator, context):
         """可以用的方法，unity端持续发目标的坐标信息，基站持续接收并返回那些哪些卫星正在跟踪以及目标坐标信息
-        最后需要实现的方法，基站作为client，持续发送卫星跟踪信息给unity端，unity最后返回一个message
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CommuWizUnity(self, request, context):
+        """unity端发起请求, base在一段时间内进行持续响应
+        request: unity端状态(bool)
+        response: 是否有目标(bool), 目标信息(目标名和LLA坐标), 追踪卫星信息(卫星名和LLA坐标)
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SendPhotos(self, request, context):
+        """unity向基站发送请求照片的信息，基站返回照片
+        request: 时间戳(string) 区域信息(左上右下LL坐标)
+        response: 时间戳(string) 区域信息(左上右下LL坐标) 照片信息([]byte)
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -60,22 +92,32 @@ def add_SatComServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'CommuWizSat': grpc.stream_stream_rpc_method_handler(
                     servicer.CommuWizSat,
-                    request_deserializer=SatCom__pb2.Sat2BaseInfo.FromString,
-                    response_serializer=SatCom__pb2.Base2SatInfo.SerializeToString,
+                    request_deserializer=SatCom__pb2.SatRequest.FromString,
+                    response_serializer=SatCom__pb2.Base2Sat.SerializeToString,
+            ),
+            'TakePhotos': grpc.unary_unary_rpc_method_handler(
+                    servicer.TakePhotos,
+                    request_deserializer=SatCom__pb2.SatPhotoRequest.FromString,
+                    response_serializer=SatCom__pb2.BasePhotoReceiveResponse.SerializeToString,
             ),
             'ReceiveFromUnity_template': grpc.stream_stream_rpc_method_handler(
                     servicer.ReceiveFromUnity_template,
-                    request_deserializer=SatCom__pb2.Unity2BaseInfo_template.FromString,
-                    response_serializer=SatCom__pb2.Base2UnityInfo.SerializeToString,
+                    request_deserializer=SatCom__pb2.UnityRequest_template.FromString,
+                    response_serializer=SatCom__pb2.Base2Unity.SerializeToString,
             ),
-            'SendToUnity': grpc.stream_unary_rpc_method_handler(
-                    servicer.SendToUnity,
-                    request_deserializer=SatCom__pb2.Base2UnityInfo.FromString,
-                    response_serializer=SatCom__pb2.Unity2BaseInfo.SerializeToString,
+            'CommuWizUnity': grpc.unary_stream_rpc_method_handler(
+                    servicer.CommuWizUnity,
+                    request_deserializer=SatCom__pb2.UnityRequest.FromString,
+                    response_serializer=SatCom__pb2.Base2Unity.SerializeToString,
+            ),
+            'SendPhotos': grpc.unary_stream_rpc_method_handler(
+                    servicer.SendPhotos,
+                    request_deserializer=SatCom__pb2.UnityPhotoRequest.FromString,
+                    response_serializer=SatCom__pb2.BasePhotoResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'SatCom', rpc_method_handlers)
+            'commu.SatCom', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
@@ -94,9 +136,26 @@ class SatCom(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.stream_stream(request_iterator, target, '/SatCom/CommuWizSat',
-            SatCom__pb2.Sat2BaseInfo.SerializeToString,
-            SatCom__pb2.Base2SatInfo.FromString,
+        return grpc.experimental.stream_stream(request_iterator, target, '/commu.SatCom/CommuWizSat',
+            SatCom__pb2.SatRequest.SerializeToString,
+            SatCom__pb2.Base2Sat.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def TakePhotos(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/commu.SatCom/TakePhotos',
+            SatCom__pb2.SatPhotoRequest.SerializeToString,
+            SatCom__pb2.BasePhotoReceiveResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -111,14 +170,14 @@ class SatCom(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.stream_stream(request_iterator, target, '/SatCom/ReceiveFromUnity_template',
-            SatCom__pb2.Unity2BaseInfo_template.SerializeToString,
-            SatCom__pb2.Base2UnityInfo.FromString,
+        return grpc.experimental.stream_stream(request_iterator, target, '/commu.SatCom/ReceiveFromUnity_template',
+            SatCom__pb2.UnityRequest_template.SerializeToString,
+            SatCom__pb2.Base2Unity.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def SendToUnity(request_iterator,
+    def CommuWizUnity(request,
             target,
             options=(),
             channel_credentials=None,
@@ -128,74 +187,14 @@ class SatCom(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.stream_unary(request_iterator, target, '/SatCom/SendToUnity',
-            SatCom__pb2.Base2UnityInfo.SerializeToString,
-            SatCom__pb2.Unity2BaseInfo.FromString,
+        return grpc.experimental.unary_stream(request, target, '/commu.SatCom/CommuWizUnity',
+            SatCom__pb2.UnityRequest.SerializeToString,
+            SatCom__pb2.Base2Unity.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
-
-class SatServerStub(object):
-    """Missing associated documentation comment in .proto file."""
-
-    def __init__(self, channel):
-        """Constructor.
-
-        Args:
-            channel: A grpc.Channel.
-        """
-        self.GetObjPosition = channel.unary_unary(
-                '/SatServer/GetObjPosition',
-                request_serializer=SatCom__pb2.ObjPosition.SerializeToString,
-                response_deserializer=SatCom__pb2.ObjPosResponse.FromString,
-                )
-        self.PredictObjTrack = channel.unary_unary(
-                '/SatServer/PredictObjTrack',
-                request_serializer=SatCom__pb2.ObjInfo.SerializeToString,
-                response_deserializer=SatCom__pb2.PredictTrack.FromString,
-                )
-
-
-class SatServerServicer(object):
-    """Missing associated documentation comment in .proto file."""
-
-    def GetObjPosition(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def PredictObjTrack(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-
-def add_SatServerServicer_to_server(servicer, server):
-    rpc_method_handlers = {
-            'GetObjPosition': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetObjPosition,
-                    request_deserializer=SatCom__pb2.ObjPosition.FromString,
-                    response_serializer=SatCom__pb2.ObjPosResponse.SerializeToString,
-            ),
-            'PredictObjTrack': grpc.unary_unary_rpc_method_handler(
-                    servicer.PredictObjTrack,
-                    request_deserializer=SatCom__pb2.ObjInfo.FromString,
-                    response_serializer=SatCom__pb2.PredictTrack.SerializeToString,
-            ),
-    }
-    generic_handler = grpc.method_handlers_generic_handler(
-            'SatServer', rpc_method_handlers)
-    server.add_generic_rpc_handlers((generic_handler,))
-
-
- # This class is part of an EXPERIMENTAL API.
-class SatServer(object):
-    """Missing associated documentation comment in .proto file."""
-
     @staticmethod
-    def GetObjPosition(request,
+    def SendPhotos(request,
             target,
             options=(),
             channel_credentials=None,
@@ -205,25 +204,8 @@ class SatServer(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/SatServer/GetObjPosition',
-            SatCom__pb2.ObjPosition.SerializeToString,
-            SatCom__pb2.ObjPosResponse.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def PredictObjTrack(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/SatServer/PredictObjTrack',
-            SatCom__pb2.ObjInfo.SerializeToString,
-            SatCom__pb2.PredictTrack.FromString,
+        return grpc.experimental.unary_stream(request, target, '/commu.SatCom/SendPhotos',
+            SatCom__pb2.UnityPhotoRequest.SerializeToString,
+            SatCom__pb2.BasePhotoResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -19,8 +19,8 @@ import logging
 from time import sleep
 
 import grpc
-import helloworld_pb2
-import helloworld_pb2_grpc
+from protos import SatCom_pb2
+from protos import SatCom_pb2_grpc
 from satellite import SatelliteInfo
 import time
 
@@ -28,7 +28,7 @@ import time
 def generate_request(id):
     satellite = SatelliteInfo(id)
     info, stamp = satellite.get_satellite_info()
-    predict_results = satellite.detect_obj_server()
+    predict_results = satellite.predict_trajectory()
     # Create a Sat2BaseInfo request object
     # print("predict_results: ", predict_results)
     find_target = False
@@ -36,10 +36,10 @@ def generate_request(id):
     if satellite.calculate_azimuth() < 120:
         find_target = True
 
-    request = helloworld_pb2.SatRequest(
-        sat_info=helloworld_pb2.SatelliteInfo(
+    request = SatCom_pb2.SatRequest(
+        sat_info=SatCom_pb2.SatelliteInfo(
             sat_name=info["name"],
-            sat_position=helloworld_pb2.LLAPosition(
+            sat_position=SatCom_pb2.LLAPosition(
                 timestamp=str(stamp),
                 alt=info["alt"],
                 lat=info["lat"],
@@ -48,9 +48,9 @@ def generate_request(id):
         ),
         find_target=find_target,
         target_info=[
-                        helloworld_pb2.TargetInfo(
+                        SatCom_pb2.TargetInfo(
                             target_name="test1",
-                            target_position=helloworld_pb2.LLAPosition(
+                            target_position=SatCom_pb2.LLAPosition(
                                 timestamp=str(int(time.time() + 30)),
                                 alt=100.0,
                                 lat=27.0,
@@ -58,9 +58,9 @@ def generate_request(id):
                             )
                         )
                     ] + [
-                        helloworld_pb2.TargetInfo(
+                        SatCom_pb2.TargetInfo(
                             target_name="test1",
-                            target_position=helloworld_pb2.LLAPosition(
+                            target_position=SatCom_pb2.LLAPosition(
                                 timestamp=str(int(time.time() + 30)),
                                 alt=0,
                                 lat=predict_res[0],
@@ -95,9 +95,9 @@ def run(sat_id):
                        ('grpc.keepalive_permit_without_calls', 1),
                        ('grpc.initial_reconnect_backoff_ms', 5000)  # 设置初始重连等待时间为5秒
                        ]
-    with grpc.insecure_channel("43.142.83.201:50051", options=channel_options) as channel:
-    # with grpc.insecure_channel("localhost:50051", options=channel_options) as channel:
-        stub = helloworld_pb2_grpc.SatComStub(channel)
+    # with grpc.insecure_channel("43.142.83.201:50051", options=channel_options) as channel:
+    with grpc.insecure_channel("localhost:50051", options=channel_options) as channel:
+        stub = SatCom_pb2_grpc.SatComStub(channel)
         while True:
             try:
                 # 发送位置请求

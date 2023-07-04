@@ -57,7 +57,7 @@ class TrackModel:
         return pred_result
     
     def preprocess(self, sequence):
-        print(sequence, type(sequence))
+        # print(sequence, type(sequence))
         # normalization
         max_seq_data, min_seq_data = sequence.max(axis = 0), sequence.min(axis = 0)
         sequence = (sequence - min_seq_data) / (max_seq_data - min_seq_data)

@@ -38,10 +38,8 @@ class SatelliteInfo:
                 self.satellite_longitude = satellite["lng"]
                 self.satellite_altitude = satellite["alt"]
 
-    def detect_obj_server(self):
+    def predict_trajectory(self):
         # TODO: listen on port to get object position info
-        tracking_length = 32
-        input_length = 120
         location_info = self.get_object_info()  # ndarray： 121*7
 
         # self.obj_source_seq.append(location_info)  # list：1*121*7
@@ -72,7 +70,7 @@ class SatelliteInfo:
 
     def get_object_info(self):
         # TODO: listen on port to get object position info
-        file_name = "../model/DataSet/test_fix.csv"
+        file_name = "./model/DataSet/test_fix.csv"
         points_list = []
         with open(file_name, 'r') as f:
             reader = csv.reader(f)
