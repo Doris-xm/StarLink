@@ -4,12 +4,13 @@ import random
 
 class BP(tf.keras.Model):
     """3-layer BP network model for trajectory prediction.
-    """    
-    def __init__(self, n_lstm, step, batch_size):        
+    """
+
+    def __init__(self, n_lstm, step, batch_size):
         super().__init__()
         self.batch_size = batch_size
         self.step = step
-        self.fc = tf.keras.layers.Dense(n_lstm, activation = tf.nn.relu, name="hidden_layer")
+        self.fc = tf.keras.layers.Dense(n_lstm, activation=tf.nn.relu, name="hidden_layer")
         self.out = tf.keras.layers.Dense(5, name="output_layer")
 
     @tf.function
@@ -20,6 +21,7 @@ class BP(tf.keras.Model):
         # z.shape: (batch_size, n_lstm) pre.shape:(batch_size, 5)
         pred = self.out(z)
         return pred
+
 
 '''
 class LSTMFixed(tf.keras.Model):
@@ -53,36 +55,40 @@ class LSTM(tf.keras.Model):
     (The input length is not fixed, but the lstm_step is fixed to 1)
 
     Build hidden layer with keras.layers.LSTM.
-    """    
+    """
+
     def __init__(self, n_lstm, step, batch_size):
         super().__init__()
         self.step = step
         self.batch_size = batch_size
         self.lstm_size = n_lstm
-        self.lstm = tf.keras.layers.LSTM(units = n_lstm, activation = tf.nn.relu, dropout=0.1)
-        self.out = tf.keras.layers.Dense(units = 5, name="output_layer")
+        self.lstm = tf.keras.layers.LSTM(units=n_lstm, activation=tf.nn.relu, dropout=0.1)
+        self.out = tf.keras.layers.Dense(units=5, name="output_layer")
 
     @tf.function
     def call(self, x):
         # x.shape: (batch_size, seq_length-step+1, step*5), y.shape: (batchsize, n_lstm)
         state = self.init_states(self.batch_size)
-        y = self.lstm(x, initial_state = state)
+        y = self.lstm(x, initial_state=state)
         # pred.shape: (batch_size, 5)
         pred = self.out(y)
-        return pred 
+        return pred
 
     def init_states(self, batch_size):
         return (tf.zeros([batch_size, self.lstm_size]), tf.zeros([batch_size, self.lstm_size]))
 
+
 class Encoder(tf.keras.Model):
     """Encoder of seq2seq model for trajectory prediction.
     Build RNN layer with keras.layers.LSTM.
-    """    
+    """
+
     def __init__(self, n_lstm, batch_size):
         super().__init__()
         self.n_lstm = n_lstm
         self.batch_size = batch_size
-        self.lstm = tf.keras.layers.LSTM(self.n_lstm, return_sequences=True, return_state=True, activation=tf.nn.relu, dropout=0.1)
+        self.lstm = tf.keras.layers.LSTM(self.n_lstm, return_sequences=True, return_state=True, activation=tf.nn.relu,
+                                         dropout=0.1)
 
     @tf.function
     def call(self, sequence):
@@ -94,7 +100,8 @@ class Encoder(tf.keras.Model):
 
     @tf.function
     def init_states(self):
-        return(tf.zeros([self.batch_size, self.n_lstm]), tf.zeros([self.batch_size, self.n_lstm]))
+        return (tf.zeros([self.batch_size, self.n_lstm]), tf.zeros([self.batch_size, self.n_lstm]))
+
 
 '''
 class Decoder_LSTMCell(tf.keras.Model):
@@ -134,17 +141,20 @@ class Decoder_LSTMCell(tf.keras.Model):
         return tf.concat(seq_out, 1)
 '''
 
+
 class Decoder(tf.keras.Model):
     """Decoder of seq2seq model for trajectory prediction.
     Build RNN layer with keras.layers.LSTM.
     The decoder can only process one point, so you need call it in a loop when traning and predicting.
-    """    
+    """
+
     def __init__(self, n_lstm, batch_size):
         super().__init__()
         self.n_lstm = n_lstm
         self.batch_size = batch_size
-        self.lstm = tf.keras.layers.LSTM(self.n_lstm, return_sequences=True, return_state=True, activation=tf.nn.relu, dropout=0.1)
-        self.out = tf.keras.layers.Dense(units = 5, name="output_layer")
+        self.lstm = tf.keras.layers.LSTM(self.n_lstm, return_sequences=True, return_state=True, activation=tf.nn.relu,
+                                         dropout=0.1)
+        self.out = tf.keras.layers.Dense(units=5, name="output_layer")
 
     def call(self, seq_in, state):
         # seq_in.shape: (batch_size, 1, 5), lstm_out.shape：(batch_size, 1, n_lstm)
@@ -159,7 +169,8 @@ class Attention(tf.keras.Model):
     """Attention layer of seq2seq model for trajectory prediction.
     Choose between three score function: ['dot', 'general', 'concat']
     The number of parameters of three function: [0, n_lstm*(n_lstm+1), 2*(n_lstm * (n_lstm+1))+1]
-    """      
+    """
+
     def __init__(self, n_lstm, attention_func):
         super().__init__()
         self.attention_func = attention_func
@@ -173,7 +184,7 @@ class Attention(tf.keras.Model):
             # Concat score function
             self.wa = tf.keras.layers.Dense(n_lstm, activation='tanh')
             self.va = tf.keras.layers.Dense(1)
-    
+
     def call(self, decoder_output, encoder_output):
         if self.attention_func == 'dot':
             # dot score function: decoder_output (dot) encoder_output
@@ -194,7 +205,7 @@ class Attention(tf.keras.Model):
             score = self.va(self.wa(tf.concat((decoder_output, encoder_output), axis=-1)))
             # transose to the shape of (batch_size, 1, encoder_length)
             score = tf.transpose(score, [0, 2, 1])
-        
+
         alignment = tf.nn.softmax(score, axis=2)
         # context vector c_t is the weighted average sum of encoder output
         context = tf.matmul(alignment, encoder_output)
@@ -205,15 +216,17 @@ class DecoderAttention(tf.keras.Model):
     """Decoder with Attention mechanism of seq2seq model for trajectory prediction.
     The decoder can only process one point, so you need call it in a loop when traning and predicting.
     Build RNN layer with keras.layers.LSTM.
-    """    
+    """
+
     def __init__(self, n_lstm, batch_size, attention_func):
         super().__init__()
         self.attention = Attention(n_lstm, attention_func)
         self.n_lstm = n_lstm
         self.batch_size = batch_size
-        self.lstm = tf.keras.layers.LSTM(self.n_lstm, return_sequences=True, return_state=True, activation=tf.nn.relu, dropout=0.1)
+        self.lstm = tf.keras.layers.LSTM(self.n_lstm, return_sequences=True, return_state=True, activation=tf.nn.relu,
+                                         dropout=0.1)
         self.wc = tf.keras.layers.Dense(n_lstm, activation='tanh', name="wc_layer")
-        self.out = tf.keras.layers.Dense(units = 5, name="output_layer")
+        self.out = tf.keras.layers.Dense(units=5, name="output_layer")
 
     def call(self, seq_in, state, encoder_output):
         # lstm_out.shape: (batch_size, 1, n_lstm)
@@ -230,5 +243,5 @@ class DecoderAttention(tf.keras.Model):
 
         return logits, lstm_out, state_h, state_c, alignment
 
-    
+
 

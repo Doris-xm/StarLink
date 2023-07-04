@@ -1,9 +1,12 @@
+import csv
 import datetime
+
+import numpy as np
 import requests
 import json
 import math
 from utils.j_time import TimeConverter
-from model.TrackModel import TrackModel
+from model.TrackModel import TrackModel, row2array
 
 
 class SatelliteInfo:
@@ -33,25 +36,53 @@ class SatelliteInfo:
                 self.satellite_longitude = satellite["lng"]
                 self.satellite_altitude = satellite["alt"]
 
-    def detect_obj_server(self, location_info):
+    def detect_obj_server(self):
         # TODO: listen on port to get object position info
         tracking_length = 32
         input_length = 120
-        location_info = self.get_object_info()
+        location_info = self.get_object_info()  # ndarray： 121*7
 
-        self.obj_source_seq.append(location_info)
+        # self.obj_source_seq.append(location_info)  # list：1*121*7
+        if len(self.obj_source_seq) == 0:
+            self.obj_source_seq = location_info
+        else:
+            self.obj_source_seq = np.concatenate((self.obj_source_seq, location_info), axis=0)  # 第一维拼接 ndarray：121*7
+
         seq_len = len(self.obj_source_seq)
 
         if seq_len > input_length:
-            self.obj_source_seq = self.obj_source_seq[seq_len - input_length :]
+            self.obj_source_seq = self.obj_source_seq[seq_len - input_length:]
 
+        # self.obj_source_seq = np.array(self.obj_source_seq)  # 将列表转换为ndarray
         predict_result = self.track_model.predict(self.obj_source_seq, tracking_length)
+        return predict_result
 
     def get_object_info(self):
         # TODO: listen on port to get object position info
-        pass
+        file_name = "../model/DataSet/test_fix.csv"
+        points_list = []
+        with open(file_name, 'r') as f:
+            reader = csv.reader(f)
+            for row in reader:
+                point = row2array(row)
+                points_list.append(point)
 
-    def set_pos(self,pos):
+        trajectory = np.array(points_list)
+        seq_length = 121
+
+        seq_temp = []
+        is_valid = False
+        while not is_valid:
+            index = np.random.randint(0, len(trajectory) - seq_length + 1)
+            seq_temp = trajectory[index: index + seq_length]
+            is_valid = True
+            for point in seq_temp:
+                if point[0] == 0.0:
+                    is_valid = False
+                    break
+        return seq_temp
+
+    def set_pos(self, pos):
         self.obj_latitude = pos.lat
         self.obj_longitude = pos.lng
         self.obj_altitude = pos.alt
@@ -94,12 +125,11 @@ class SatelliteInfo:
         delta_longitude = longitude_rad - obj_longitude_rad
 
         x = math.cos(math.radians(self.obj_latitude)) * math.sin(math.radians(self.satellite_latitude)) - math.sin(
-            math.radians(self.obj_latitude)) * math.cos(math.radians(self.satellite_latitude)) * math.cos(delta_longitude)
+            math.radians(self.obj_latitude)) * math.cos(math.radians(self.satellite_latitude)) * math.cos(
+            delta_longitude)
         y = math.sin(delta_longitude) * math.cos(math.radians(self.satellite_latitude))
         z = math.sin(math.radians(self.obj_latitude)) * math.sin(math.radians(self.satellite_latitude)) + math.cos(
-            math.radians(self.obj_latitude)) * math.cos(math.radians(self.satellite_latitude)) * math.cos(delta_longitude)
+            math.radians(self.obj_latitude)) * math.cos(math.radians(self.satellite_latitude)) * math.cos(
+            delta_longitude)
 
         return [x, y, z]
-
-
-

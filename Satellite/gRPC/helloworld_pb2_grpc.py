@@ -16,18 +16,28 @@ class SatComStub(object):
         """
         self.CommuWizSat = channel.stream_stream(
                 '/commu.SatCom/CommuWizSat',
-                request_serializer=helloworld__pb2.Sat2BaseInfo.SerializeToString,
-                response_deserializer=helloworld__pb2.Base2SatInfo.FromString,
+                request_serializer=helloworld__pb2.SatRequest.SerializeToString,
+                response_deserializer=helloworld__pb2.Base2Sat.FromString,
+                )
+        self.TakePhotos = channel.unary_unary(
+                '/commu.SatCom/TakePhotos',
+                request_serializer=helloworld__pb2.SatPhotoRequest.SerializeToString,
+                response_deserializer=helloworld__pb2.BasePhotoReceiveResponse.FromString,
                 )
         self.ReceiveFromUnity_template = channel.stream_stream(
                 '/commu.SatCom/ReceiveFromUnity_template',
-                request_serializer=helloworld__pb2.Unity2BaseInfo_template.SerializeToString,
-                response_deserializer=helloworld__pb2.Base2UnityInfo.FromString,
+                request_serializer=helloworld__pb2.UnityRequest_template.SerializeToString,
+                response_deserializer=helloworld__pb2.Base2Unity.FromString,
                 )
-        self.SendToUnity = channel.stream_unary(
-                '/commu.SatCom/SendToUnity',
-                request_serializer=helloworld__pb2.Base2UnityInfo.SerializeToString,
-                response_deserializer=helloworld__pb2.Unity2BaseInfo.FromString,
+        self.CommuWizUnity = channel.unary_stream(
+                '/commu.SatCom/CommuWizUnity',
+                request_serializer=helloworld__pb2.UnityRequest.SerializeToString,
+                response_deserializer=helloworld__pb2.Base2Unity.FromString,
+                )
+        self.SendPhotos = channel.unary_stream(
+                '/commu.SatCom/SendPhotos',
+                request_serializer=helloworld__pb2.UnityPhotoRequest.SerializeToString,
+                response_deserializer=helloworld__pb2.BasePhotoResponse.FromString,
                 )
 
 
@@ -35,21 +45,43 @@ class SatComServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def CommuWizSat(self, request_iterator, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def ReceiveFromUnity_template(self, request_iterator, context):
-        """卫星作为client，向基站发信，两端都是流的方法
+        """satellite时刻广播自己的位置, base返回目标信息以及是否有照片请求
+        request: 卫星信息, 是否发现目标, 目标位置信息
+        response: 基站位置, 是否发现目标, 目标位置信息, 是否有拍照请求, 请求拍照区域
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def SendToUnity(self, request_iterator, context):
+    def TakePhotos(self, request, context):
+        """satellite拍摄完成后发起请求, base接受照片信息并返回是否成功接收
+        request: 时间戳, 卫星信息, 区域信息, 照片信息
+        response: 时间戳, 是否成功收到照片
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ReceiveFromUnity_template(self, request_iterator, context):
         """可以用的方法，unity端持续发目标的坐标信息，基站持续接收并返回那些哪些卫星正在跟踪以及目标坐标信息
-        最后需要实现的方法，基站作为client，持续发送卫星跟踪信息给unity端，unity最后返回一个message
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CommuWizUnity(self, request, context):
+        """unity端发起请求, base在一段时间内进行持续响应
+        request: unity端状态(bool)
+        response: 是否有目标(bool), 目标信息(目标名和LLA坐标), 追踪卫星信息(卫星名和LLA坐标)
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SendPhotos(self, request, context):
+        """unity向基站发送请求照片的信息，基站返回照片
+        request: 时间戳(string) 区域信息(左上右下LL坐标)
+        response: 时间戳(string) 区域信息(左上右下LL坐标) 照片信息([]byte)
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -60,18 +92,28 @@ def add_SatComServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'CommuWizSat': grpc.stream_stream_rpc_method_handler(
                     servicer.CommuWizSat,
-                    request_deserializer=helloworld__pb2.Sat2BaseInfo.FromString,
-                    response_serializer=helloworld__pb2.Base2SatInfo.SerializeToString,
+                    request_deserializer=helloworld__pb2.SatRequest.FromString,
+                    response_serializer=helloworld__pb2.Base2Sat.SerializeToString,
+            ),
+            'TakePhotos': grpc.unary_unary_rpc_method_handler(
+                    servicer.TakePhotos,
+                    request_deserializer=helloworld__pb2.SatPhotoRequest.FromString,
+                    response_serializer=helloworld__pb2.BasePhotoReceiveResponse.SerializeToString,
             ),
             'ReceiveFromUnity_template': grpc.stream_stream_rpc_method_handler(
                     servicer.ReceiveFromUnity_template,
-                    request_deserializer=helloworld__pb2.Unity2BaseInfo_template.FromString,
-                    response_serializer=helloworld__pb2.Base2UnityInfo.SerializeToString,
+                    request_deserializer=helloworld__pb2.UnityRequest_template.FromString,
+                    response_serializer=helloworld__pb2.Base2Unity.SerializeToString,
             ),
-            'SendToUnity': grpc.stream_unary_rpc_method_handler(
-                    servicer.SendToUnity,
-                    request_deserializer=helloworld__pb2.Base2UnityInfo.FromString,
-                    response_serializer=helloworld__pb2.Unity2BaseInfo.SerializeToString,
+            'CommuWizUnity': grpc.unary_stream_rpc_method_handler(
+                    servicer.CommuWizUnity,
+                    request_deserializer=helloworld__pb2.UnityRequest.FromString,
+                    response_serializer=helloworld__pb2.Base2Unity.SerializeToString,
+            ),
+            'SendPhotos': grpc.unary_stream_rpc_method_handler(
+                    servicer.SendPhotos,
+                    request_deserializer=helloworld__pb2.UnityPhotoRequest.FromString,
+                    response_serializer=helloworld__pb2.BasePhotoResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -95,8 +137,25 @@ class SatCom(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.stream_stream(request_iterator, target, '/commu.SatCom/CommuWizSat',
-            helloworld__pb2.Sat2BaseInfo.SerializeToString,
-            helloworld__pb2.Base2SatInfo.FromString,
+            helloworld__pb2.SatRequest.SerializeToString,
+            helloworld__pb2.Base2Sat.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def TakePhotos(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/commu.SatCom/TakePhotos',
+            helloworld__pb2.SatPhotoRequest.SerializeToString,
+            helloworld__pb2.BasePhotoReceiveResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -112,13 +171,13 @@ class SatCom(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.stream_stream(request_iterator, target, '/commu.SatCom/ReceiveFromUnity_template',
-            helloworld__pb2.Unity2BaseInfo_template.SerializeToString,
-            helloworld__pb2.Base2UnityInfo.FromString,
+            helloworld__pb2.UnityRequest_template.SerializeToString,
+            helloworld__pb2.Base2Unity.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def SendToUnity(request_iterator,
+    def CommuWizUnity(request,
             target,
             options=(),
             channel_credentials=None,
@@ -128,8 +187,25 @@ class SatCom(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.stream_unary(request_iterator, target, '/commu.SatCom/SendToUnity',
-            helloworld__pb2.Base2UnityInfo.SerializeToString,
-            helloworld__pb2.Unity2BaseInfo.FromString,
+        return grpc.experimental.unary_stream(request, target, '/commu.SatCom/CommuWizUnity',
+            helloworld__pb2.UnityRequest.SerializeToString,
+            helloworld__pb2.Base2Unity.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def SendPhotos(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(request, target, '/commu.SatCom/SendPhotos',
+            helloworld__pb2.UnityPhotoRequest.SerializeToString,
+            helloworld__pb2.BasePhotoResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

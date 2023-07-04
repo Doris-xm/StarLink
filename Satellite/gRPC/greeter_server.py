@@ -19,7 +19,7 @@ import logging
 import grpc
 import helloworld_pb2
 import helloworld_pb2_grpc
-from satellite import SatelliteInfo
+# from satellite import SatelliteInfo
 
 
 class Greeter(helloworld_pb2_grpc.SatComServicer):
@@ -39,12 +39,20 @@ class Greeter(helloworld_pb2_grpc.SatComServicer):
             # Generate the response message
 
             # For example, you can return a dummy response
-            response = helloworld_pb2.Base2SatInfo(
-                base_position=helloworld_pb2.PositionInfo(timestamp="123", alt=100.0, lat=27.0, lng=15.0, target_name="test"),
+            response = helloworld_pb2.Base2Sat(
+                base_position=helloworld_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),
                 find_target=True,
-                target_position=[
-                    helloworld_pb2.PositionInfo(timestamp="123", alt=100.0, lat=27.0, lng=15.0, target_name="test"),
-                    helloworld_pb2.PositionInfo(timestamp="456", alt=200.0, lat=28.0, lng=16.0, target_name="test"),
+                target_info = [ helloworld_pb2.TargetInfo(target_name="test1",
+                                                          target_position=helloworld_pb2.LLAPosition(timestamp="123", lat=27.0, lng=15.0, alt=100.0),),
+                                helloworld_pb2.TargetInfo(target_name="test2",
+                                                            target_position=helloworld_pb2.LLAPosition(timestamp="123", lat=27.0, lng=15.0, alt=100.0),),
+                                ],
+                take_photo=True,
+                zone = [
+                    helloworld_pb2.ZoneInfo(upper_left=helloworld_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),
+                                            bottom_right=helloworld_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),),
+                    helloworld_pb2.ZoneInfo(upper_left=helloworld_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),
+                                            bottom_right=helloworld_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),),
                 ]
             )
 

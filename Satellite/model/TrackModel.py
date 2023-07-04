@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-import Model
+import model.Model as Model
 import csv
 
 n_lstm = 128
@@ -39,7 +39,7 @@ class TrackModel:
         history = encoder_outputs[0]
         # Decoder predicts the target_seq. decoder_in shape of [batch_size, 1, 5]
         decoder_in = tf.expand_dims(source_seq[:, -1], 1)
-        print(decoder_in)
+        # print(decoder_in)
         for t in range(decoder_length):
             logit, lstm_out, de_state_h, de_state_c, _= self.DecoderAttention(decoder_in, states, history)
             # logit shape of [batch_size, 5]
@@ -52,7 +52,7 @@ class TrackModel:
         pred = np.array(pred)
 
         pred_result = self.cal_position(pred, max_seq_data, min_seq_data, sequence[-1, 5], sequence[-1, 6])
-        print(pred_result)
+        # print(pred_result)
         return pred_result
     
     def preprocess(self, sequence):
@@ -63,7 +63,7 @@ class TrackModel:
         seq_reshape = []
         seq_reshape.append(sequence)
         seq_encode = np.array(seq_reshape)[:, :, :5]
-        print(seq_encode.shape)
+        # print(seq_encode.shape)
 
         return seq_encode, max_seq_data, min_seq_data
     
@@ -77,7 +77,7 @@ class TrackModel:
         delta_time = delta_time.tolist()
         delta_lng = delta_lng.tolist()
         delta_lat = delta_lat.tolist()
-        print(pred)
+        # print(pred)
 
         lng0 = lng_start
         lat0 = lat_start
@@ -119,7 +119,7 @@ if __name__ == '__main__':
             points_list.append(point)
     
     trajectory = np.array(points_list)
-    print("trajectory", trajectory.shape)
+    # print("trajectory", trajectory.shape)
 
     seq_length = 121
     

@@ -24,47 +24,67 @@ import helloworld_pb2_grpc
 from satellite import SatelliteInfo
 import time
 
-def generate_request():
-    satellite = SatelliteInfo(25544)
+
+def generate_request(id):
+    satellite = SatelliteInfo(id)
     info, stamp = satellite.get_satellite_info()
+    predict_results = satellite.detect_obj_server()
     # Create a Sat2BaseInfo request object
-    request = helloworld_pb2.Sat2BaseInfo()
-    request.sat_name = info["name"]
+    # print("predict_results: ", predict_results)
+    find_target = False
+    print("azimuth: ", satellite.calculate_azimuth())
+    if satellite.calculate_azimuth() < 120:
+        find_target = True
 
-    # Set sat_position
-    sat_position = helloworld_pb2.PositionInfo()
-    sat_position.timestamp = str(stamp)
-    sat_position.alt = 100.0
-    sat_position.lat = 27.0
-    sat_position.lng = 15.0
-    sat_position.target_name = "test"
-    request.sat_position.CopyFrom(sat_position)
-
-    # Set target_position (repeated field)
-    target_positions = [
-        helloworld_pb2.PositionInfo(timestamp=str(int(time.time()+30)), alt=100.0, lat=27.0, lng=15.0, target_name="test"),
-        helloworld_pb2.PositionInfo(timestamp=str(int(time.time()+30)), alt=200.0, lat=28.0, lng=16.0, target_name="test"),
-        helloworld_pb2.PositionInfo(timestamp=str(int(time.time()+30)), alt=200.0, lat=28.0, lng=16.0, target_name="test"),
-        helloworld_pb2.PositionInfo(timestamp=str(int(time.time()+30)), alt=200.0, lat=28.0, lng=16.0, target_name="test"),
-    ]
-    request.target_position.extend(target_positions)
-
-    # Set find_target
-    request.find_target = True
-
+    request = helloworld_pb2.SatRequest(
+        sat_info=helloworld_pb2.SatelliteInfo(
+            sat_name=info["name"],
+            sat_position=helloworld_pb2.LLAPosition(
+                timestamp=str(stamp),
+                alt=info["alt"],
+                lat=info["lat"],
+                lng=info["lng"]
+            )
+        ),
+        find_target=find_target,
+        target_info=[
+                        helloworld_pb2.TargetInfo(
+                            target_name="test1",
+                            target_position=helloworld_pb2.LLAPosition(
+                                timestamp=str(int(time.time() + 30)),
+                                alt=100.0,
+                                lat=27.0,
+                                lng=15.0
+                            )
+                        )
+                    ] + [
+                        helloworld_pb2.TargetInfo(
+                            target_name="test1",
+                            target_position=helloworld_pb2.LLAPosition(
+                                timestamp=str(int(time.time() + 30)),
+                                alt=0,
+                                lat=predict_res[0],
+                                lng=predict_res[1],
+                            )
+                        )
+                        for predict_res in predict_results
+                    ]
+    )
+    # print("Satellite client send: ")
     # print(request)
     return request
 
 
-def generate_requests():
+def generate_requests(id):
     requests = [
-        generate_request(),
+        generate_request(id),
         # generate_request()
     ]
     for request in requests:
         yield request
 
-def run():
+
+def run(sat_id):
     # NOTE(gRPC Python Team): .close() is possible on a channel and should be
     # used in circumstances in which the with statement does not fit the needs
     # of the code.
@@ -80,26 +100,14 @@ def run():
         stub = helloworld_pb2_grpc.SatComStub(channel)
         while True:
             try:
-                #发送位置请求
-                request = generate_requests()
-                # response = stub.CommuWizSat(request)
-                # print(response.code())
+                # 发送位置请求
+                request = generate_requests(sat_id)
                 response_iterator = stub.CommuWizSat(request)
 
                 print("Satellite client received: ")
                 for response in response_iterator:
                     print(response)
 
-
-                #处理响应
-                # print(response)
-                satellite = SatelliteInfo(25544)
-                satellite.detect_obj(generate_request().target_position[0])
-                print("calculate_azimuth: ")
-                print(satellite.calculate_azimuth())
-
-                # 休眠一段时间
-                # sleep(1)
             except grpc.RpcError as e:
                 print(e)
                 sleep(1)
@@ -108,4 +116,4 @@ def run():
 
 if __name__ == "__main__":
     logging.basicConfig()
-    run()
+    run(44752)
