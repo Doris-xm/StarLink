@@ -33,7 +33,7 @@ class PredDaemon(threading.Thread):
             self.satellite.detect_obj()
 
 
-class SatelliteServer(SatCom_pb2_grpc.SatServerServicer):
+class SatelliteServer(SatCom_pb2_grpc.SatComServicer):
     def __init__(self, satellite_id):
         self.satellite_id = satellite_id
         self.satelliteInfo = SatelliteInfo(satellite_id)
@@ -69,7 +69,7 @@ class SatelliteServer(SatCom_pb2_grpc.SatServerServicer):
 def serve():
     port = "7777"
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    SatCom_pb2_grpc.add_SatServerServicer_to_server(SatelliteServer(2012), server)
+    SatCom_pb2_grpc.add_SatComServicer_to_server(SatelliteServer(2012), server)
     server.add_insecure_port("[::]:" + port)
     server.start()
     print("Server started, listening on " + port)

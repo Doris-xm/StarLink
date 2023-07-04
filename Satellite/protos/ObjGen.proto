@@ -2,6 +2,7 @@ syntax = "proto3";
 
 service ObjGen{
     rpc StartLoadObj(SatelliteAddr) returns (LoadResponse);
+    rpc GetObjPos(Obj) returns (ObjPos);
 }
 
 message SatelliteAddr {
@@ -14,4 +15,20 @@ message SatelliteAddr {
 message LoadResponse {
   bool successful = 1;
   int32 ObjID = 2;
+}
+
+message ObjPos {
+    int32 ObjID = 1;
+    string timestamp = 2;
+    float delta_time = 3;
+    float delta_lng = 4;
+    float delta_lat = 5;
+    float sog = 6;
+    float cog = 7;
+    float lng = 8;
+    float lat = 9;
+}
+
+message Obj {
+    int32 ObjID = 1;
 }
