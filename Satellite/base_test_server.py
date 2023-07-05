@@ -50,17 +50,25 @@ class Test(SatCom_pb2_grpc.SatComServicer):
                 take_photo=True,
                 zone = [
                     SatCom_pb2.ZoneInfo(request_identify=True,
-                                        upper_left=SatCom_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),
-                                        bottom_right=SatCom_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),),
+                                        upper_left=SatCom_pb2.LLPosition(timestamp="123", lat=121.78518, lng=31.15397),
+                                        bottom_right=SatCom_pb2.LLPosition(timestamp="123", lat=121.80518, lng=31.13397)),
                     SatCom_pb2.ZoneInfo(request_identify=True,
-                                        upper_left=SatCom_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),
-                                        bottom_right=SatCom_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),),
+                                        upper_left=SatCom_pb2.LLPosition(timestamp="123", lat=121.78518, lng=31.15397),
+                                        bottom_right=SatCom_pb2.LLPosition(timestamp="123", lat=121.80518, lng=31.13397)),
                 ]
             )
 
             # Yield the response
             yield response
 
+    def TakePhotos(self, request, context):
+        img = request.image_data
+        with open("test.jpg", "wb") as f:
+            f.write(img)
+        response = SatCom_pb2.BasePhotoReceiveResponse(
+            receive_photo=True
+        )
+        return response
 
 def serve():
     port = "50051"

@@ -5,6 +5,7 @@ import grpc
 from protos import SatCom_pb2
 from protos import SatCom_pb2_grpc
 from satellite import SatelliteInfo
+from utils.tile import getTile
 
 
 class SatelliteClient:
@@ -60,6 +61,19 @@ class SatelliteClient:
         ]
         for request in requests:
             yield request
+    
+    def generate_photo_request(self, zone):
+        x1 = zone.upper_left.lat
+        y1 = zone.upper_left.lng
+        x2 = zone.bottom_right.lat
+        y2 = zone.bottom_right.lng
+        tile = getTile(x1, y1, x2, y2)
+        sat_photo_request = SatCom_pb2.SatPhotoRequest(
+            timestamp = str(self.satellite.get_satellite_info()[1]), # 获取时间戳
+            zone = zone,
+            image_data = tile,
+        )
+        return sat_photo_request
 
     def run(self):
         logging.basicConfig()
@@ -84,7 +98,11 @@ class SatelliteClient:
 
                     print("Satellite client received: ")
                     for response in response_iterator:
-                        print(response)
+                        if response.take_photo:
+                            zones = response.zone
+                            for zone in zones:
+                                request = self.generate_photo_request(zone)
+                                stub.TakePhotos(request)
 
                     # 添加间隔时间
                     sleep(5)  # 在每次请求之后等待 5 秒
