@@ -86,6 +86,9 @@ class SatelliteClient:
                     for response in response_iterator:
                         print(response)
 
+                    # 添加间隔时间
+                    sleep(5)  # 在每次请求之后等待 5 秒
+
                 except grpc.RpcError as e:
                     print(e)
                     sleep(1)

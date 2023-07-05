@@ -39,7 +39,6 @@ class SatelliteInfo:
                 self.satellite_altitude = satellite["alt"]
 
     def predict_trajectory(self):
-        # TODO: listen on port to get object position info
         curr_obj = self.get_object_info()  # ndarray： 121*7
 
         # self.obj_source_seq.append(location_info)  # list：1*121*7
@@ -67,30 +66,8 @@ class SatelliteInfo:
         return len(self.obj_source_seq)
 
     def get_object_info(self):
-        # TODO: listen on port to get object position info
-        # file_name = "./model/DataSet/test_fix.csv"
-        # points_list = []
-        # with open(file_name, 'r') as f:
-        #     reader = csv.reader(f)
-        #     for row in reader:
-        #         point = row2array(row)
-        #         points_list.append(point)
-        #
-        # trajectory = np.array(points_list)
-        # seq_length = 121
-        #
-        # seq_temp = []
-        # is_valid = False
-        # while not is_valid:
-        #     index = np.random.randint(0, len(trajectory) - seq_length + 1)
-        #     seq_temp = trajectory[index: index + seq_length]
-        #     is_valid = True
-        #     for point in seq_temp:
-        #         if point[0] == 0.0:
-        #             is_valid = False
-        #             break
-        # return seq_temp
-        curr_pos = ObjDetectClient.detect_obj(0)
+        # 向检测模块请求当前目标的位置信息
+        curr_pos = ObjDetectClient.detect_obj(0)    # 0是目标物ID
         new_ndarray = np.array([[curr_pos.delta_time, curr_pos.delta_lng, curr_pos.delta_lat, curr_pos.sog, curr_pos.cog, curr_pos.lng, curr_pos.lat]])
         if self.obj_source_seq == []:
             self.obj_source_seq = new_ndarray
