@@ -47,7 +47,7 @@ class SatComServicer(object):
     def CommuWizSat(self, request_iterator, context):
         """satellite时刻广播自己的位置, base返回目标信息以及是否有照片请求
         request: 卫星信息, 是否发现目标, 目标位置信息
-        response: 基站位置, 是否发现目标, 目标位置信息, 是否有拍照请求, 请求拍照区域
+        response: 基站位置, 是否发现目标, 目标位置信息, 是否有拍照请求, 请求拍照区域，是否有识别请求
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -81,7 +81,7 @@ class SatComServicer(object):
     def SendPhotos(self, request, context):
         """unity向基站发送请求照片的信息，基站返回照片
         request: 时间戳(string) 区域信息(左上右下LL坐标)
-        response: 时间戳(string) 区域信息(左上右下LL坐标) 照片信息([]byte)
+        response: 时间戳(string) 照片信息([]byte)
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')

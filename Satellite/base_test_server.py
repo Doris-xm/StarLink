@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The Python implementation of the GRPC helloworld.Greeter server."""
-
-from concurrent import futures
 import logging
+from concurrent import futures
+
 
 import grpc
 from protos import SatCom_pb2_grpc
@@ -49,10 +49,12 @@ class Test(SatCom_pb2_grpc.SatComServicer):
                                 ],
                 take_photo=True,
                 zone = [
-                    SatCom_pb2.ZoneInfo(upper_left=SatCom_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),
-                                            bottom_right=SatCom_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),),
-                    SatCom_pb2.ZoneInfo(upper_left=SatCom_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),
-                                            bottom_right=SatCom_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),),
+                    SatCom_pb2.ZoneInfo(request_identify=True,
+                                        upper_left=SatCom_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),
+                                        bottom_right=SatCom_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),),
+                    SatCom_pb2.ZoneInfo(request_identify=True,
+                                        upper_left=SatCom_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),
+                                        bottom_right=SatCom_pb2.LLPosition(timestamp="123", lat=27.0, lng=15.0,),),
                 ]
             )
 

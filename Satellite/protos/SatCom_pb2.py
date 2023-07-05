@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cSatCom.proto\x12\x05\x63ommu\"9\n\nLLPosition\x12\x11\n\ttimestamp\x18\x01 \x01(\t\x12\x0b\n\x03lat\x18\x02 \x01(\x02\x12\x0b\n\x03lng\x18\x03 \x01(\x02\"G\n\x0bLLAPosition\x12\x11\n\ttimestamp\x18\x01 \x01(\t\x12\x0b\n\x03\x61lt\x18\x02 \x01(\x02\x12\x0b\n\x03lat\x18\x03 \x01(\x02\x12\x0b\n\x03lng\x18\x04 \x01(\x02\"N\n\nTargetInfo\x12\x13\n\x0btarget_name\x18\x01 \x01(\t\x12+\n\x0ftarget_position\x18\x02 \x01(\x0b\x32\x12.commu.LLAPosition\"Z\n\x08ZoneInfo\x12%\n\nupper_left\x18\x02 \x01(\x0b\x32\x11.commu.LLPosition\x12\'\n\x0c\x62ottom_right\x18\x03 \x01(\x0b\x32\x11.commu.LLPosition\"K\n\rSatelliteInfo\x12\x10\n\x08sat_name\x18\x01 \x01(\t\x12(\n\x0csat_position\x18\x02 \x01(\x0b\x32\x12.commu.LLAPosition\"q\n\nSatRequest\x12&\n\x08sat_info\x18\x01 \x01(\x0b\x32\x14.commu.SatelliteInfo\x12\x13\n\x0b\x66ind_target\x18\x02 \x01(\x08\x12&\n\x0btarget_info\x18\x03 \x03(\x0b\x32\x11.commu.TargetInfo\"\xa4\x01\n\x08\x42\x61se2Sat\x12(\n\rbase_position\x18\x01 \x01(\x0b\x32\x11.commu.LLPosition\x12\x13\n\x0b\x66ind_target\x18\x02 \x01(\x08\x12&\n\x0btarget_info\x18\x03 \x03(\x0b\x32\x11.commu.TargetInfo\x12\x12\n\ntake_photo\x18\x04 \x01(\x08\x12\x1d\n\x04zone\x18\x05 \x03(\x0b\x32\x0f.commu.ZoneInfo\"\x7f\n\x0fSatPhotoRequest\x12\x11\n\ttimestamp\x18\x01 \x01(\t\x12&\n\x08sat_info\x18\x02 \x01(\x0b\x32\x14.commu.SatelliteInfo\x12\x1d\n\x04zone\x18\x03 \x01(\x0b\x32\x0f.commu.ZoneInfo\x12\x12\n\nimage_data\x18\x04 \x01(\x0c\"D\n\x18\x42\x61sePhotoReceiveResponse\x12\x11\n\ttimestamp\x18\x01 \x01(\t\x12\x15\n\rreceive_photo\x18\x02 \x01(\x08\"!\n\x0cUnityRequest\x12\x11\n\tstatus_ok\x18\x01 \x01(\x08\"X\n\x15UnityRequest_template\x12\x13\n\x0b\x66ind_target\x18\x01 \x01(\x08\x12*\n\x0ftarget_position\x18\x02 \x03(\x0b\x32\x11.commu.TargetInfo\"y\n\nBase2Unity\x12\x13\n\x0b\x66ind_target\x18\x01 \x01(\x08\x12*\n\x0ftarget_position\x18\x02 \x03(\x0b\x32\x11.commu.TargetInfo\x12*\n\x0ctracking_sat\x18\x03 \x03(\x0b\x32\x14.commu.SatelliteInfo\"E\n\x11UnityPhotoRequest\x12\x11\n\ttimestamp\x18\x01 \x01(\t\x12\x1d\n\x04zone\x18\x02 \x01(\x0b\x32\x0f.commu.ZoneInfo\"Y\n\x11\x42\x61sePhotoResponse\x12\x11\n\ttimestamp\x18\x01 \x01(\t\x12\x1d\n\x04zone\x18\x02 \x01(\x0b\x32\x0f.commu.ZoneInfo\x12\x12\n\nimage_data\x18\x03 \x01(\x0c\x32\xd7\x02\n\x06SatCom\x12\x35\n\x0b\x43ommuWizSat\x12\x11.commu.SatRequest\x1a\x0f.commu.Base2Sat(\x01\x30\x01\x12\x45\n\nTakePhotos\x12\x16.commu.SatPhotoRequest\x1a\x1f.commu.BasePhotoReceiveResponse\x12P\n\x19ReceiveFromUnity_template\x12\x1c.commu.UnityRequest_template\x1a\x11.commu.Base2Unity(\x01\x30\x01\x12\x39\n\rCommuWizUnity\x12\x13.commu.UnityRequest\x1a\x11.commu.Base2Unity0\x01\x12\x42\n\nSendPhotos\x12\x18.commu.UnityPhotoRequest\x1a\x18.commu.BasePhotoResponse0\x01\x42\rZ\x0bstarlink/pbb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cSatCom.proto\x12\x05\x63ommu\"9\n\nLLPosition\x12\x11\n\ttimestamp\x18\x01 \x01(\t\x12\x0b\n\x03lat\x18\x02 \x01(\x02\x12\x0b\n\x03lng\x18\x03 \x01(\x02\"G\n\x0bLLAPosition\x12\x11\n\ttimestamp\x18\x01 \x01(\t\x12\x0b\n\x03\x61lt\x18\x02 \x01(\x02\x12\x0b\n\x03lat\x18\x03 \x01(\x02\x12\x0b\n\x03lng\x18\x04 \x01(\x02\"N\n\nTargetInfo\x12\x13\n\x0btarget_name\x18\x01 \x01(\t\x12+\n\x0ftarget_position\x18\x02 \x01(\x0b\x32\x12.commu.LLAPosition\"t\n\x08ZoneInfo\x12\x18\n\x10request_identify\x18\x01 \x01(\x08\x12%\n\nupper_left\x18\x02 \x01(\x0b\x32\x11.commu.LLPosition\x12\'\n\x0c\x62ottom_right\x18\x03 \x01(\x0b\x32\x11.commu.LLPosition\"K\n\rSatelliteInfo\x12\x10\n\x08sat_name\x18\x01 \x01(\t\x12(\n\x0csat_position\x18\x02 \x01(\x0b\x32\x12.commu.LLAPosition\"q\n\nSatRequest\x12&\n\x08sat_info\x18\x01 \x01(\x0b\x32\x14.commu.SatelliteInfo\x12\x13\n\x0b\x66ind_target\x18\x02 \x01(\x08\x12&\n\x0btarget_info\x18\x03 \x03(\x0b\x32\x11.commu.TargetInfo\"\xa4\x01\n\x08\x42\x61se2Sat\x12(\n\rbase_position\x18\x01 \x01(\x0b\x32\x11.commu.LLPosition\x12\x13\n\x0b\x66ind_target\x18\x02 \x01(\x08\x12&\n\x0btarget_info\x18\x03 \x03(\x0b\x32\x11.commu.TargetInfo\x12\x12\n\ntake_photo\x18\x04 \x01(\x08\x12\x1d\n\x04zone\x18\x05 \x03(\x0b\x32\x0f.commu.ZoneInfo\"\x7f\n\x0fSatPhotoRequest\x12\x11\n\ttimestamp\x18\x01 \x01(\t\x12&\n\x08sat_info\x18\x02 \x01(\x0b\x32\x14.commu.SatelliteInfo\x12\x1d\n\x04zone\x18\x03 \x01(\x0b\x32\x0f.commu.ZoneInfo\x12\x12\n\nimage_data\x18\x04 \x01(\x0c\"D\n\x18\x42\x61sePhotoReceiveResponse\x12\x11\n\ttimestamp\x18\x01 \x01(\t\x12\x15\n\rreceive_photo\x18\x02 \x01(\x08\"!\n\x0cUnityRequest\x12\x11\n\tstatus_ok\x18\x01 \x01(\x08\"X\n\x15UnityRequest_template\x12\x13\n\x0b\x66ind_target\x18\x01 \x01(\x08\x12*\n\x0ftarget_position\x18\x02 \x03(\x0b\x32\x11.commu.TargetInfo\"=\n\x12TrackingSatellites\x12\'\n\tsatellite\x18\x01 \x03(\x0b\x32\x14.commu.SatelliteInfo\"\xe5\x01\n\nBase2Unity\x12\x13\n\x0b\x66ind_target\x18\x01 \x01(\x08\x12*\n\x0ftarget_position\x18\x02 \x03(\x0b\x32\x11.commu.TargetInfo\x12\x42\n\x11target_satellites\x18\x03 \x03(\x0b\x32\'.commu.Base2Unity.TargetSatellitesEntry\x1aR\n\x15TargetSatellitesEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12(\n\x05value\x18\x02 \x01(\x0b\x32\x19.commu.TrackingSatellites:\x02\x38\x01\"E\n\x11UnityPhotoRequest\x12\x11\n\ttimestamp\x18\x01 \x01(\t\x12\x1d\n\x04zone\x18\x02 \x01(\x0b\x32\x0f.commu.ZoneInfo\":\n\x11\x42\x61sePhotoResponse\x12\x11\n\ttimestamp\x18\x01 \x01(\t\x12\x12\n\nimage_data\x18\x02 \x01(\x0c\x32\xd7\x02\n\x06SatCom\x12\x35\n\x0b\x43ommuWizSat\x12\x11.commu.SatRequest\x1a\x0f.commu.Base2Sat(\x01\x30\x01\x12\x45\n\nTakePhotos\x12\x16.commu.SatPhotoRequest\x1a\x1f.commu.BasePhotoReceiveResponse\x12P\n\x19ReceiveFromUnity_template\x12\x1c.commu.UnityRequest_template\x1a\x11.commu.Base2Unity(\x01\x30\x01\x12\x39\n\rCommuWizUnity\x12\x13.commu.UnityRequest\x1a\x11.commu.Base2Unity0\x01\x12\x42\n\nSendPhotos\x12\x18.commu.UnityPhotoRequest\x1a\x18.commu.BasePhotoResponse0\x01\x42\rZ\x0bstarlink/pbb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -22,6 +22,8 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'Z\013starlink/pb'
+  _BASE2UNITY_TARGETSATELLITESENTRY._options = None
+  _BASE2UNITY_TARGETSATELLITESENTRY._serialized_options = b'8\001'
   _globals['_LLPOSITION']._serialized_start=23
   _globals['_LLPOSITION']._serialized_end=80
   _globals['_LLAPOSITION']._serialized_start=82
@@ -29,27 +31,31 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['_TARGETINFO']._serialized_start=155
   _globals['_TARGETINFO']._serialized_end=233
   _globals['_ZONEINFO']._serialized_start=235
-  _globals['_ZONEINFO']._serialized_end=325
-  _globals['_SATELLITEINFO']._serialized_start=327
-  _globals['_SATELLITEINFO']._serialized_end=402
-  _globals['_SATREQUEST']._serialized_start=404
-  _globals['_SATREQUEST']._serialized_end=517
-  _globals['_BASE2SAT']._serialized_start=520
-  _globals['_BASE2SAT']._serialized_end=684
-  _globals['_SATPHOTOREQUEST']._serialized_start=686
-  _globals['_SATPHOTOREQUEST']._serialized_end=813
-  _globals['_BASEPHOTORECEIVERESPONSE']._serialized_start=815
-  _globals['_BASEPHOTORECEIVERESPONSE']._serialized_end=883
-  _globals['_UNITYREQUEST']._serialized_start=885
-  _globals['_UNITYREQUEST']._serialized_end=918
-  _globals['_UNITYREQUEST_TEMPLATE']._serialized_start=920
-  _globals['_UNITYREQUEST_TEMPLATE']._serialized_end=1008
-  _globals['_BASE2UNITY']._serialized_start=1010
-  _globals['_BASE2UNITY']._serialized_end=1131
-  _globals['_UNITYPHOTOREQUEST']._serialized_start=1133
-  _globals['_UNITYPHOTOREQUEST']._serialized_end=1202
-  _globals['_BASEPHOTORESPONSE']._serialized_start=1204
-  _globals['_BASEPHOTORESPONSE']._serialized_end=1293
-  _globals['_SATCOM']._serialized_start=1296
-  _globals['_SATCOM']._serialized_end=1639
+  _globals['_ZONEINFO']._serialized_end=351
+  _globals['_SATELLITEINFO']._serialized_start=353
+  _globals['_SATELLITEINFO']._serialized_end=428
+  _globals['_SATREQUEST']._serialized_start=430
+  _globals['_SATREQUEST']._serialized_end=543
+  _globals['_BASE2SAT']._serialized_start=546
+  _globals['_BASE2SAT']._serialized_end=710
+  _globals['_SATPHOTOREQUEST']._serialized_start=712
+  _globals['_SATPHOTOREQUEST']._serialized_end=839
+  _globals['_BASEPHOTORECEIVERESPONSE']._serialized_start=841
+  _globals['_BASEPHOTORECEIVERESPONSE']._serialized_end=909
+  _globals['_UNITYREQUEST']._serialized_start=911
+  _globals['_UNITYREQUEST']._serialized_end=944
+  _globals['_UNITYREQUEST_TEMPLATE']._serialized_start=946
+  _globals['_UNITYREQUEST_TEMPLATE']._serialized_end=1034
+  _globals['_TRACKINGSATELLITES']._serialized_start=1036
+  _globals['_TRACKINGSATELLITES']._serialized_end=1097
+  _globals['_BASE2UNITY']._serialized_start=1100
+  _globals['_BASE2UNITY']._serialized_end=1329
+  _globals['_BASE2UNITY_TARGETSATELLITESENTRY']._serialized_start=1247
+  _globals['_BASE2UNITY_TARGETSATELLITESENTRY']._serialized_end=1329
+  _globals['_UNITYPHOTOREQUEST']._serialized_start=1331
+  _globals['_UNITYPHOTOREQUEST']._serialized_end=1400
+  _globals['_BASEPHOTORESPONSE']._serialized_start=1402
+  _globals['_BASEPHOTORESPONSE']._serialized_end=1460
+  _globals['_SATCOM']._serialized_start=1463
+  _globals['_SATCOM']._serialized_end=1806
 # @@protoc_insertion_point(module_scope)
