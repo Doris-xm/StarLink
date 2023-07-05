@@ -12,6 +12,29 @@ class SatelliteClient:
     def __init__(self, sat_id):
         self.sat_id = sat_id
         self.satellite = SatelliteInfo(sat_id)
+        self.channel = None  # 保存通道对象
+        self.stub = None  # 保存存根对象
+
+    def connect(self):
+        print("Trying to connect ...")
+        channel_options = [
+            ('grpc.keepalive_time_ms', 8000),
+            ('grpc.keepalive_timeout_ms', 5000),
+            ('grpc.http2.max_pings_without_data', 10),
+            ('grpc.keepalive_permit_without_calls', 1),
+            ('grpc.initial_reconnect_backoff_ms', 5000)
+        ]
+        # 创建通道和存根
+        self.channel = grpc.insecure_channel("43.142.83.201:50051", options=channel_options)
+        # self.channel = grpc.insecure_channel("localhost:50051", options=channel_options)
+        self.stub = SatCom_pb2_grpc.SatComStub(self.channel)
+
+    def disconnect(self):
+        # 关闭通道
+        if self.channel:
+            self.channel.close()
+        self.channel = None
+        self.stub = None
 
     def generate_request(self):
         info, stamp = self.satellite.get_satellite_info()
@@ -28,7 +51,8 @@ class SatelliteClient:
                     lng=info["lng"]
                 )
             ),
-            find_target=find_target,
+            # find_target=find_target,
+            find_target=True,
             target_info=[
                 SatCom_pb2.TargetInfo(
                     target_name=str(curr_obj[0]),
@@ -79,38 +103,34 @@ class SatelliteClient:
         logging.basicConfig()
 
         print("Will try to send location ...")
-        channel_options = [
-            ('grpc.keepalive_time_ms', 8000),
-            ('grpc.keepalive_timeout_ms', 5000),
-            ('grpc.http2.max_pings_without_data', 10),
-            ('grpc.keepalive_permit_without_calls', 1),
-            ('grpc.initial_reconnect_backoff_ms', 5000)
-        ]
 
-        with grpc.insecure_channel("localhost:50051", options=channel_options) as channel:
-            stub = SatCom_pb2_grpc.SatComStub(channel)
+        while True:
+            try:
+                # 连接到服务器
+                if self.channel==None:
+                    self.connect()
 
-            while True:
-                try:
-                    # 发送位置请求
-                    request = self.generate_requests()
-                    response_iterator = stub.CommuWizSat(request)
+                # 发送位置请求
+                request = self.generate_requests()
+                response_iterator = self.stub.CommuWizSat(request)
 
-                    print("Satellite client received: ")
-                    for response in response_iterator:
-                        if response.take_photo:
-                            zones = response.zone
-                            for zone in zones:
-                                request = self.generate_photo_request(zone)
-                                stub.TakePhotos(request)
+                print("Satellite client received: ")
+                for response in response_iterator:
+                    if response.take_photo:
+                        zones = response.zone
+                        for zone in zones:
+                            request = self.generate_photo_request(zone)
+                            self.stub.TakePhotos(request)
 
-                    # 添加间隔时间
-                    sleep(5)  # 在每次请求之后等待 5 秒
+                # 添加间隔时间
+                sleep(5)  # 在每次请求之后等待 5 秒
 
-                except grpc.RpcError as e:
-                    print(e)
-                    sleep(1)
-                    continue
+            except grpc.RpcError as e:
+                print(e)
+                sleep(1)
+                # 断开与服务器的连接
+                self.disconnect()
+                continue
 
 
 if __name__ == "__main__":
