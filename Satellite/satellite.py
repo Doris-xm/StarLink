@@ -49,7 +49,7 @@ class SatelliteInfo:
             self.obj_source_seq = self.obj_source_seq[seq_len - input_length:]
 
         # self.obj_source_seq = np.array(self.obj_source_seq)  # 将列表转换为ndarray
-        if seq_len < 20:
+        if seq_len < 5:
             return curr_obj, []
         predict_results = self.track_model.predict(self.obj_source_seq, tracking_length)
         return curr_obj, predict_results
