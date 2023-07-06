@@ -2,10 +2,12 @@ import logging
 from time import sleep
 
 import grpc
+import os
 from protos import SatCom_pb2
 from protos import SatCom_pb2_grpc
 from satellite import SatelliteInfo
 from utils.tile import getTile
+from detect import ObjectDetector
 
 
 class SatelliteClient:
@@ -14,6 +16,7 @@ class SatelliteClient:
         self.satellite = SatelliteInfo(sat_id)
         self.channel = None  # 保存通道对象
         self.stub = None  # 保存存根对象
+        self.detector = ObjectDetector()
 
     def connect(self):
         print("Trying to connect ...")
@@ -95,8 +98,12 @@ class SatelliteClient:
         if zone.request_identify:
             with open('tile.jpg', 'wb') as f:
                 f.write(tile)
-            self.detect()
-            
+            self.detector.detect()
+            with open('./models/output/tile.jpg', 'rb') as f:
+                tile = f.read()
+            # delete both files
+            os.remove('tile.jpg')
+            os.remove('./models/output/tile.jpg')
         sat_photo_request = SatCom_pb2.SatPhotoRequest(
             timestamp = str(self.satellite.get_satellite_info()[1]), # 获取时间戳
             zone = zone,
