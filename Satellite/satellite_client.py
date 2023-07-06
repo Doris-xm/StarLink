@@ -5,7 +5,7 @@ import grpc
 from protos import SatCom_pb2
 from protos import SatCom_pb2_grpc
 from satellite import SatelliteInfo
-
+import threading
 
 class SatelliteClient:
     def __init__(self, sat_id):
@@ -38,6 +38,7 @@ class SatelliteClient:
     def generate_request(self):
         info, stamp = self.satellite.get_satellite_info()
         curr_obj, predict_results = self.satellite.predict_trajectory()
+        timestamp_ = int(curr_obj[1])
         find_target = self.satellite.calculate_azimuth() < 120
 
         request = SatCom_pb2.SatRequest(
@@ -54,7 +55,7 @@ class SatelliteClient:
             find_target=True,
             target_info=[
                 SatCom_pb2.TargetInfo(
-                    target_name=str(curr_obj[0]),
+                    target_name="id"+str(curr_obj[0]),
                     target_position=SatCom_pb2.LLAPosition(
                         timestamp=curr_obj[1],
                         alt=0,
@@ -66,7 +67,7 @@ class SatelliteClient:
                 SatCom_pb2.TargetInfo(
                     target_name="test1",
                     target_position=SatCom_pb2.LLAPosition(
-                        timestamp=curr_obj[1],
+                        timestamp=str(timestamp_++1),
                         alt=0,
                         lat=predict_res[0],
                         lng=predict_res[1],
@@ -75,7 +76,6 @@ class SatelliteClient:
                 for predict_res in predict_results
             ]
         )
-
         return request
 
     def generate_requests(self):
@@ -115,6 +115,43 @@ class SatelliteClient:
                 continue
 
 
+IDs = [
+    25544,
+    44713,
+    44717,
+    44752,
+    44718,
+    44725,
+    44738,
+    44757,
+    44920,
+    44926,
+    45365,
+    45379,
+]
+
+class SatelliteClientThread(threading.Thread):
+    def __init__(self, sat_id):
+        threading.Thread.__init__(self)
+        self.client = SatelliteClient(sat_id)
+
+    def run(self):
+        self.client.run()
+
+
 if __name__ == "__main__":
-    client = SatelliteClient(44752)
-    client.run()
+    # 创建并启动多个线程
+    threads = []
+    for id in IDs:
+        thread = SatelliteClientThread(id)
+        threads.append(thread)
+        thread.start()
+
+    # 等待所有线程完成
+    for thread in threads:
+        thread.join()
+
+# # 单进程
+# if __name__ == "__main__":
+#     client = SatelliteClient(25544)
+#     client.run()
