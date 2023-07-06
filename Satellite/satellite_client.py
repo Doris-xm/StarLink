@@ -25,7 +25,7 @@ class SatelliteClient:
             ('grpc.initial_reconnect_backoff_ms', 5000)
         ]
         # 创建通道和存根
-        self.channel = grpc.insecure_channel("43.142.83.201:50051", options=channel_options)
+        self.channel = grpc.insecure_channel("localhost:50051", options=channel_options)
         # self.channel = grpc.insecure_channel("localhost:50051", options=channel_options)
         self.stub = SatCom_pb2_grpc.SatComStub(self.channel)
 
@@ -92,6 +92,11 @@ class SatelliteClient:
         x2 = zone.bottom_right.lat
         y2 = zone.bottom_right.lng
         tile = getTile(x1, y1, x2, y2)
+        if zone.request_identify:
+            with open('tile.jpg', 'wb') as f:
+                f.write(tile)
+            self.detect()
+            
         sat_photo_request = SatCom_pb2.SatPhotoRequest(
             timestamp = str(self.satellite.get_satellite_info()[1]), # 获取时间戳
             zone = zone,
