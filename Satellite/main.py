@@ -1,11 +1,28 @@
 from satellite import SatelliteInfo
 
-
+IDs = [
+    25544,
+    44713,
+    44717,
+    44752,
+    44718,
+    44725,
+    44738,
+    44757,
+    44920,
+    44926,
+    45365,
+    45379,
+]
 # for test
 def print_satellite_info(satellite_id):
     # 创建SatelliteInfo对象
-    satellite_info = SatelliteInfo(satellite_id)
-    satellite = satellite_info.get_satellite_info()
+    for id in IDs:
+        satellite_info = SatelliteInfo(id)
+        satellite, stamp = satellite_info.get_satellite_info()
+        print(str(satellite["id"])+"  "+ satellite["name"])
+    # satellite_info = SatelliteInfo(satellite_id)
+    # satellite = satellite_info.get_satellite_info()
 
     # json 格式示例：
     # "sats": [
@@ -24,17 +41,17 @@ def print_satellite_info(satellite_id):
     #             "raan": 295.5138,升交点赤经
     #             "age": 0.3，    卫星年龄
     #         },
-    if satellite:
-        print("Satellite Info:")
-        print(satellite)
-    else:
-        print("Satellite not found.")
+    # if satellite:
+    #     print("Satellite Info:")
+    #     print(satellite)
+    # else:
+    #     print("Satellite not found.")
 
 
 
-    # 计算偏角
-    azimuth = satellite_info.calculate_azimuth()
-    print("Azimuth:", azimuth)
+    # # 计算偏角
+    # azimuth = satellite_info.calculate_azimuth()
+    # print("Azimuth:", azimuth)
 
 
 

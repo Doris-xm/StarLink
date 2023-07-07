@@ -36,6 +36,6 @@ def detect_obj(obj_id):
             sleep(1)
 
 
-# if __name__ == "__main__":
-#     logging.basicConfig()
-#     detect_obj(0)
+if __name__ == "__main__":
+    logging.basicConfig()
+    detect_obj(0)

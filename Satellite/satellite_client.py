@@ -30,7 +30,7 @@ class SatelliteClient:
         ]
         # 创建通道和存根
         self.channel = grpc.insecure_channel("localhost:50051", options=channel_options)
-        # self.channel = grpc.insecure_channel("localhost:50051", options=channel_options)
+        # self.channel = grpc.insecure_channel("43.142.83.201:50051", options=channel_options)
         self.stub = SatCom_pb2_grpc.SatComStub(self.channel)
 
     def disconnect(self):
@@ -44,8 +44,14 @@ class SatelliteClient:
         info, stamp = self.satellite.get_satellite_info()
         curr_obj, predict_results = self.satellite.predict_trajectory()
         timestamp_ = int(curr_obj[1])
-        find_target = self.satellite.calculate_azimuth() < 120
-
+        find_target = self.satellite.calculate_azimuth() < 90
+        # 随便加的经纬度约束
+        if abs(info["lat"] - curr_obj[2]) > 10.0:
+            find_target = False
+        if abs(info["lng"] - curr_obj[3]) > 10.0:
+            find_target = False
+        if find_target:
+            print(info["name"]+" find target!")
         request = SatCom_pb2.SatRequest(
             sat_info=SatCom_pb2.SatelliteInfo(
                 sat_name=info["name"],
@@ -56,11 +62,11 @@ class SatelliteClient:
                     lng=info["lng"]
                 )
             ),
-            # find_target=find_target,
-            find_target=True,
+            find_target=find_target,
+            # find_target=True,
             target_info=[
                 SatCom_pb2.TargetInfo(
-                    target_name="id"+str(curr_obj[0]),
+                    target_name=info["name"]+"\'s target",
                     target_position=SatCom_pb2.LLAPosition(
                         timestamp=curr_obj[1],
                         alt=0,
@@ -70,7 +76,7 @@ class SatelliteClient:
                 )
             ] + [
                 SatCom_pb2.TargetInfo(
-                    target_name="test1",
+                    target_name=info["name"]+"\'s target",
                     target_position=SatCom_pb2.LLAPosition(
                         timestamp=str(timestamp_++1),
                         alt=0,
@@ -130,11 +136,12 @@ class SatelliteClient:
 
                 print("Satellite client received: ")
                 for response in response_iterator:
-                    if response.take_photo:
-                        zones = response.zone
-                        for zone in zones:
-                            request = self.generate_photo_request(zone)
-                            self.stub.TakePhotos(request)
+                    print(response)
+                    # if response.take_photo:
+                    #     zones = response.zone
+                    #     for zone in zones:
+                    #         request = self.generate_photo_request(zone)
+                    #         self.stub.TakePhotos(request)
 
                 # 添加间隔时间
                 sleep(5)  # 在每次请求之后等待 5 秒
