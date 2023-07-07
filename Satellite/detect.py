@@ -125,35 +125,8 @@ class ObjectDetector:
                 # Print time (inference + NMS)
                 print('%sDone. (%.3fs)' % (s, t2 - t1))
 
-                # Stream results
-                if self.view_img:
-                    cv2.imshow(p, im0)
-                    if cv2.waitKey(1) == ord('q'):  # q to quit
-                        raise StopIteration
-
-                # Save results (image with detections)
-                if save_img:
-                    if dataset.mode == 'images':
-                        cv2.imwrite(save_path, im0)
-                    else:
-                        if vid_path != save_path:  # new video
-                            vid_path = save_path
-                            if isinstance(vid_writer, cv2.VideoWriter):
-                                vid_writer.release()  # release previous video writer
-
-                            fourcc = 'mp4v'  # output video codec
-                            fps = vid_cap.get(cv2.CAP_PROP_FPS)
-                            w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-                            h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-                            vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*fourcc), fps, (w, h))
-                        vid_writer.write(im0)
-
-        if self.save_txt or save_img:
-            print('Results saved to %s' % Path(self.output))
-            if platform.system() == 'Darwin' and not self.update:  # MacOS
-                os.system('open ' + save_path)
-
-        print('Done. (%.3fs)' % (time.time() - t0))
+        # return byte[] of image
+        return cv2.imencode('.jpg', im0)[1].tobytes()
 
 if __name__ == '__main__':
     detector = ObjectDetector()

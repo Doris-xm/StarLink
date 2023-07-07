@@ -100,12 +100,8 @@ class SatelliteClient:
         if zone.request_identify:
             with open('tile.jpg', 'wb') as f:
                 f.write(tile)
-            self.detector.detect()
-            with open('./models/output/tile.jpg', 'rb') as f:
-                tile = f.read()
+            tile = self.detector.detect()
             # delete both files
-            os.remove('tile.jpg')
-            os.remove('./models/output/tile.jpg')
         sat_photo_request = SatCom_pb2.SatPhotoRequest(
             timestamp = str(self.satellite.get_satellite_info()[1]), # 获取时间戳
             zone = zone,
@@ -171,19 +167,19 @@ class SatelliteClientThread(threading.Thread):
         self.client.run()
 
 
-if __name__ == "__main__":
-    # 创建并启动多个线程
-    threads = []
-    for id in IDs:
-        thread = SatelliteClientThread(id)
-        threads.append(thread)
-        thread.start()
 
-    # 等待所有线程完成
-    for thread in threads:
-        thread.join()
-
-# # 单进程
 # if __name__ == "__main__":
-#     client = SatelliteClient(25544)
-#     client.run()
+#     # 创建并启动多个线程
+#     threads = []
+#     for id in IDs:
+#         thread = SatelliteClientThread(id)
+#         threads.append(thread)
+#         thread.start()
+
+#     # 等待所有线程完成
+#     for thread in threads:
+#         thread.join()
+
+if __name__ == "__main__":
+    client = SatelliteClient(25544)
+    client.run()
