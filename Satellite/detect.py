@@ -19,11 +19,10 @@ from utils.torch_utils import select_device, load_classifier, time_synchronized
 
 
 class ObjectDetector:
-    def __init__(self, weights='./models/best.pt', source='tile.jpg', output='./models/output',
+    def __init__(self, weights='./models/best.pt', output='./models/output',
                  img_size=640, conf_thres=0.4, iou_thres=0.5, device='', view_img=False,
                  save_txt=False, classes=None, agnostic_nms=False, augment=False, update=False):
         self.weights = weights
-        self.source = source
         self.output = output
         self.img_size = img_size
         self.conf_thres = conf_thres
@@ -61,7 +60,7 @@ class ObjectDetector:
         vid_path, vid_writer = None, None
         webcam = False
         save_img = True
-        dataset = LoadImages(self.source, img_size=imgsz)
+        dataset = LoadImages(image_bytes, img_size=imgsz)
 
         # Get names and colors
         names = model.module.names if hasattr(model, 'module') else model.names

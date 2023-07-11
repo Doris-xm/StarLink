@@ -98,10 +98,7 @@ class SatelliteClient:
         y2 = zone.bottom_right.lng
         tile = getTile(x1, y1, x2, y2)
         if zone.request_identify:
-            with open('tile.jpg', 'wb') as f:
-                f.write(tile)
-            tile = self.detector.detect()
-            # delete both files
+            tile = self.detector.detect(tile)
         sat_photo_request = SatCom_pb2.SatPhotoRequest(
             timestamp = str(self.satellite.get_satellite_info()[1]), # 获取时间戳
             zone = zone,
