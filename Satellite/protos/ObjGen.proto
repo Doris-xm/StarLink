@@ -1,8 +1,12 @@
 syntax = "proto3";
 
+import "google/protobuf/empty.proto";
+
 service ObjGen{
     rpc StartLoadObj(SatelliteAddr) returns (LoadResponse);
     rpc GetObjPos(Obj) returns (ObjPos);
+
+    rpc SendObjPos(ObjPos) returns (google.protobuf.Empty);
 }
 
 message SatelliteAddr {

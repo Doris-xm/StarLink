@@ -7,17 +7,16 @@ from protos import SatCom_pb2
 from protos import SatCom_pb2_grpc
 from satellite import SatelliteInfo
 from utils.tile import getTile
-from detect import ObjectDetector
+from gRPC.Ports import ports
 
 import threading
 
 class SatelliteClient:
-    def __init__(self, sat_id):
+    def __init__(self, sat_id, port):
         self.sat_id = sat_id
-        self.satellite = SatelliteInfo(sat_id)
+        self.satellite = SatelliteInfo(sat_id, port)
         self.channel = None  # 保存通道对象
         self.stub = None  # 保存存根对象
-        self.detector = ObjectDetector()
 
     def connect(self):
         print("Trying to connect ...")
@@ -43,13 +42,30 @@ class SatelliteClient:
     def generate_request(self):
         info, stamp = self.satellite.get_satellite_info()
         curr_obj, predict_results = self.satellite.predict_trajectory()
-        timestamp_ = int(curr_obj[1])
-        find_target = self.satellite.calculate_azimuth() < 90
+        # 当前没有目标
+        if curr_obj is None:
+            return SatCom_pb2.SatRequest(
+            sat_info=SatCom_pb2.SatelliteInfo(
+                    sat_name=info["name"],
+                    sat_position=SatCom_pb2.LLAPosition(
+                        timestamp=str(stamp),
+                        alt=info["alt"],
+                        lat=info["lat"],
+                        lng=info["lng"]
+                    )
+                ),
+                find_target=False,
+            )
+
+
+        # timestamp_ = int(curr_obj[1])
+        timestamp_ = str(stamp)  #TODO:物体时间戳怎么确定？
+        find_target = self.satellite.calculate_azimuth() < 60.0
         # 随便加的经纬度约束
-        if abs(info["lat"] - curr_obj[2]) > 10.0:
-            find_target = False
-        if abs(info["lng"] - curr_obj[3]) > 10.0:
-            find_target = False
+        # if abs(info["lat"] - curr_obj[2]) > 10.0:
+        #     find_target = False
+        # if abs(info["lng"] - curr_obj[3]) > 10.0:
+        #     find_target = False
         if find_target:
             print(info["name"]+" find target!")
         request = SatCom_pb2.SatRequest(
@@ -66,19 +82,19 @@ class SatelliteClient:
             # find_target=True,
             target_info=[
                 SatCom_pb2.TargetInfo(
-                    target_name=info["name"]+"\'s target",
+                    target_name="test obj",
                     target_position=SatCom_pb2.LLAPosition(
-                        timestamp=curr_obj[1],
+                        timestamp=timestamp_,
                         alt=0,
-                        lat=curr_obj[2],
-                        lng=curr_obj[3],
+                        lat=curr_obj[6],
+                        lng=curr_obj[5],
                     )
                 )
             ] + [
                 SatCom_pb2.TargetInfo(
-                    target_name=info["name"]+"\'s target",
+                    target_name="test obj's predict",
                     target_position=SatCom_pb2.LLAPosition(
-                        timestamp=str(timestamp_++1),
+                        timestamp=str(stamp++1),
                         alt=0,
                         lat=predict_res[0],
                         lng=predict_res[1],
@@ -170,10 +186,9 @@ IDs = [
 ]
 
 class SatelliteClientThread(threading.Thread):
-    def __init__(self, sat_id):
+    def __init__(self, sat_id, port):
         threading.Thread.__init__(self)
-        self.client = SatelliteClient(sat_id)
-
+        self.client = SatelliteClient(sat_id, port)
     def run(self):
         self.client.run()
 
@@ -181,8 +196,8 @@ class SatelliteClientThread(threading.Thread):
 if __name__ == "__main__":
     # 创建并启动多个线程
     threads = []
-    for id in IDs:
-        thread = SatelliteClientThread(id)
+    for i in range(len(IDs)):
+        thread = SatelliteClientThread(IDs[i], ports[i])
         threads.append(thread)
         thread.start()
 
@@ -190,7 +205,8 @@ if __name__ == "__main__":
     for thread in threads:
         thread.join()
 
-# # 单进程
+# 单进程
 # if __name__ == "__main__":
-#     client = SatelliteClient(25544)
+#     client = SatelliteClient(25544, ports[0])
+#     print("Satellite client started ...")
 #     client.run()

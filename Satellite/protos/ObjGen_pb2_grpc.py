@@ -3,6 +3,7 @@
 import grpc
 
 from . import ObjGen_pb2 as ObjGen__pb2
+from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
 class ObjGenStub(object):
@@ -24,6 +25,11 @@ class ObjGenStub(object):
                 request_serializer=ObjGen__pb2.Obj.SerializeToString,
                 response_deserializer=ObjGen__pb2.ObjPos.FromString,
                 )
+        self.SendObjPos = channel.unary_unary(
+                '/ObjGen/SendObjPos',
+                request_serializer=ObjGen__pb2.ObjPos.SerializeToString,
+                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                )
 
 
 class ObjGenServicer(object):
@@ -41,6 +47,12 @@ class ObjGenServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def SendObjPos(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ObjGenServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -53,6 +65,11 @@ def add_ObjGenServicer_to_server(servicer, server):
                     servicer.GetObjPos,
                     request_deserializer=ObjGen__pb2.Obj.FromString,
                     response_serializer=ObjGen__pb2.ObjPos.SerializeToString,
+            ),
+            'SendObjPos': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendObjPos,
+                    request_deserializer=ObjGen__pb2.ObjPos.FromString,
+                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -95,5 +112,22 @@ class ObjGen(object):
         return grpc.experimental.unary_unary(request, target, '/ObjGen/GetObjPos',
             ObjGen__pb2.Obj.SerializeToString,
             ObjGen__pb2.ObjPos.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def SendObjPos(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/ObjGen/SendObjPos',
+            ObjGen__pb2.ObjPos.SerializeToString,
+            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

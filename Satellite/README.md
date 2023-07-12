@@ -6,7 +6,7 @@
 
 1. 生成轨迹
     ```shell
-    python obj_detect_server.py
+    python obj_detect_sensor.py
     ```
 
 

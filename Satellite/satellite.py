@@ -1,18 +1,20 @@
 import csv
 import datetime
+import multiprocessing
+
 import numpy as np
 import requests
 import json
 import math
 from utils.j_time import TimeConverter
 from model.TrackModel import TrackModel, row2array
-import obj_detect_client as ObjDetectClient
+from obj_detect_server import Detect_obj
 
 tracking_length = 32
 input_length = 120
 
 class SatelliteInfo:
-    def __init__(self, satellite_id):
+    def __init__(self, satellite_id, port):
         self.url = "https://satellitemap.space/json/sl.json?0.9801881003148946+v1007+43361"
         self.satellite = None
         self.satellite_id = satellite_id
@@ -25,6 +27,15 @@ class SatelliteInfo:
         self.obj_altitude = 0.0
         self.obj_source_seq = []
         self.track_model = TrackModel()
+        self.port = port
+        self.detect_obj = Detect_obj(self.port)
+        # 创建队列用于进程间通信
+        self.queue = multiprocessing.Queue()
+        # 开启守护进程
+        self.daemon = multiprocessing.Process(target=self.detect_obj.run, args=(self.queue,))
+        self.daemon.daemon = True  # 设置守护进程
+        self.daemon.start()
+
 
     def fetch_data(self):
         response = requests.get(self.url)
@@ -40,7 +51,8 @@ class SatelliteInfo:
 
     def predict_trajectory(self):
         curr_obj = self.get_object_info()  # ndarray： 121*7
-
+        if curr_obj is None:
+            return None, []
         # self.obj_source_seq.append(location_info)  # list：1*121*7
 
         seq_len = len(self.obj_source_seq)
@@ -54,26 +66,33 @@ class SatelliteInfo:
         predict_results = self.track_model.predict(self.obj_source_seq, tracking_length)
         return curr_obj, predict_results
 
-    def set_object_info(self, objID, delta_time, delta_lng, delta_lat, sog, cog, lng, lat):
-        self.obj_source_seq.append([delta_time, delta_lng, delta_lat, sog, cog, lng, lat])
-        seq_len = len(self.obj_source_seq)
-        # if seq_len == input_length:
-        #     self.detect_obj()
-
-        if seq_len > input_length:
-            self.obj_source_seq = self.obj_source_seq[seq_len - input_length:]
-            # self.detect_obj()
-        return len(self.obj_source_seq)
+    # def set_object_info(self, objID, delta_time, delta_lng, delta_lat, sog, cog, lng, lat):
+    #     self.obj_source_seq.append([delta_time, delta_lng, delta_lat, sog, cog, lng, lat])
+    #     seq_len = len(self.obj_source_seq)
+    #     # if seq_len == input_length:
+    #     #     self.detect_obj()
+    #
+    #     if seq_len > input_length:
+    #         self.obj_source_seq = self.obj_source_seq[seq_len - input_length:]
+    #         # self.detect_obj()
+    #     return len(self.obj_source_seq)
 
     def get_object_info(self):
         # 向检测模块请求当前目标的位置信息
-        curr_pos = ObjDetectClient.detect_obj(0)    # 0是目标物ID
-        new_ndarray = np.array([[curr_pos.delta_time, curr_pos.delta_lng, curr_pos.delta_lat, curr_pos.sog, curr_pos.cog, curr_pos.lng, curr_pos.lat]])
-        if self.obj_source_seq == []:
-            self.obj_source_seq = new_ndarray
-        else:
-            self.obj_source_seq = np.concatenate((self.obj_source_seq, new_ndarray), axis=0)
-        return [curr_pos.ObjID, curr_pos.timestamp, curr_pos.lat, curr_pos.lng]
+        results = []
+        try:
+            while True:
+                results.append(self.queue.get_nowait())
+        except Exception as e: # nowait：队列为空时，会抛出异常Empty
+            if results == []:
+                return None
+
+            results = np.concatenate(results, axis=0)
+            if self.obj_source_seq == []:
+                self.obj_source_seq = results
+            else:
+                self.obj_source_seq = np.concatenate((self.obj_source_seq, results), axis=0)
+            return results[len(results) - 1]
 
 
     def set_pos(self, pos):
