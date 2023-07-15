@@ -75,7 +75,7 @@ class ObjDetect(ObjGen_pb2_grpc.ObjGenServicer):
         while True:
             for i in range(len(seq)):
                 ObjInfo = ObjGen_pb2.ObjPos()
-                ObjInfo.ObjID = self.objID
+                ObjInfo.obj_id = self.objID
                 print(seq[i])
                 ObjInfo.delta_time = seq[i, 0]
                 ObjInfo.delta_lng = seq[i, 1]

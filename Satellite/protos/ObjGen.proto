@@ -10,7 +10,7 @@ service ObjGen{
 }
 
 message SatelliteAddr {
-    int32 SatID = 1;
+    int32 sat_id = 1;
     string sate_name = 2;
     string addr = 3;
     int32 port = 4;
@@ -18,11 +18,11 @@ message SatelliteAddr {
 
 message LoadResponse {
   bool successful = 1;
-  int32 ObjID = 2;
+  int32 obj_id = 2;
 }
 
 message ObjPos {
-    int32 ObjID = 1;
+    int32 obj_id = 1;
     string timestamp = 2;
     float delta_time = 3;
     float delta_lng = 4;
@@ -34,5 +34,5 @@ message ObjPos {
 }
 
 message Obj {
-    int32 ObjID = 1;
+    int32 obj_id = 1;
 }

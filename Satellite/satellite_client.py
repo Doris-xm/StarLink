@@ -17,6 +17,7 @@ class SatelliteClient:
         self.satellite = SatelliteInfo(sat_id, port)
         self.channel = None  # 保存通道对象
         self.stub = None  # 保存存根对象
+        self.curr_timestamp = 0
 
     def connect(self):
         print("Trying to connect ...")
@@ -42,8 +43,9 @@ class SatelliteClient:
 
     def generate_request(self):
         info, stamp = self.satellite.get_satellite_info()
+        self.curr_timestamp = stamp
         #   获取当前物体位置
-        curr_obj = self.satellite.get_object_info()
+        curr_obj, obj_name = self.satellite.get_object_info()
         # 当前没有目标
         if curr_obj is None:
             return SatCom_pb2.SatRequest(
@@ -61,26 +63,17 @@ class SatelliteClient:
 
         print ("curr_obj", curr_obj)
 
-        #   判断是否在监控范围内
-        find_target = self.satellite.calculate_azimuth(curr_obj) < 60.0
-        # 随便加的经纬度约束
-        # if abs(info["lat"] - curr_obj[2]) > 10.0:
-        #     find_target = False
-        # if abs(info["lng"] - curr_obj[3]) > 10.0:
-        #     find_target = False
-        if find_target:
-            print(info["name"] + " find target!")
-            #   获取预测轨迹
-            predict_results = self.satellite.predict_trajectory()
-            print("predict_results", len(predict_results))
 
-            stamp_tmp = stamp
-            for predict_res in predict_results:
-                stamp_tmp += 1
-                predict_res.append(stamp_tmp)
+        print(info["name"] + " find target!")
+        #   获取预测轨迹
+        predict_results = self.satellite.predict_trajectory(obj_name)
+        print("predict_results", predict_results)
 
-        else:
-            predict_results = []
+        stamp_tmp = stamp
+        for predict_res in predict_results:
+            stamp_tmp += 1
+            predict_res.append(stamp_tmp)
+
 
         request = SatCom_pb2.SatRequest(
             sat_info=SatCom_pb2.SatelliteInfo(
@@ -92,10 +85,10 @@ class SatelliteClient:
                     lng=info["lng"]
                 )
             ),
-            find_target=find_target,
+            find_target=True,
             target_info=[
                 SatCom_pb2.TargetInfo(
-                    target_name="test obj",
+                    target_name=obj_name,
                     target_position=SatCom_pb2.LLAPosition(
                         timestamp=str(stamp),
                         alt=0,
@@ -105,18 +98,18 @@ class SatelliteClient:
                 )
             ] + [
                 SatCom_pb2.TargetInfo(
-                    target_name="test obj",
+                    target_name=obj_name,
                     target_position=SatCom_pb2.LLAPosition(
                         timestamp=str(predict_res[2]),
                         alt=0,
-                        lat=predict_res[0],
-                        lng=predict_res[1],
+                        lat=predict_res[1],
+                        lng=predict_res[0],
                     )
                 )
                 for predict_res in predict_results
             ]
         )
-        print(request)
+        # print(request)
         return request
 
     def generate_requests(self):
@@ -164,13 +157,28 @@ class SatelliteClient:
                 response_iterator = self.stub.CommuWizSat(request)
 
                 print("Satellite client received: ")
-                # for response in response_iterator:
-                #     print(response)
+                for response in response_iterator:
+                    # print(response)
                     # if response.take_photo:
                     #     zones = response.zone
                     #     for zone in zones:
                     #         request = self.generate_photo_request(zone)
                     #         self.stub.TakePhotos(request)
+
+                    #处理返回target info
+                    # print(response.target_info)
+                    for target in response.target_info:
+                        print("target", target)
+                        find_target = self.satellite.calculate_azimuth([target.target_position.lat, target.target_position.lng]) < 60.0
+                        # find_target = True
+                        if find_target:
+                            # 判断是否是预测
+                            if int(target.target_position.timestamp) <= self.curr_timestamp:
+                                self.satellite.add_new_target(target.target_name, target.target_position)
+                            else:
+                                self.satellite.add_new_target(target.target_name, None)
+
+
 
                 # 添加间隔时间
                 sleep(5)  # 在每次请求之后等待 5 秒

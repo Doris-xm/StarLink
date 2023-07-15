@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cObjGen.proto\x1a\x1bgoogle/protobuf/empty.proto\"M\n\rSatelliteAddr\x12\r\n\x05SatID\x18\x01 \x01(\x05\x12\x11\n\tsate_name\x18\x02 \x01(\t\x12\x0c\n\x04\x61\x64\x64r\x18\x03 \x01(\t\x12\x0c\n\x04port\x18\x04 \x01(\x05\"1\n\x0cLoadResponse\x12\x12\n\nsuccessful\x18\x01 \x01(\x08\x12\r\n\x05ObjID\x18\x02 \x01(\x05\"\x98\x01\n\x06ObjPos\x12\r\n\x05ObjID\x18\x01 \x01(\x05\x12\x11\n\ttimestamp\x18\x02 \x01(\t\x12\x12\n\ndelta_time\x18\x03 \x01(\x02\x12\x11\n\tdelta_lng\x18\x04 \x01(\x02\x12\x11\n\tdelta_lat\x18\x05 \x01(\x02\x12\x0b\n\x03sog\x18\x06 \x01(\x02\x12\x0b\n\x03\x63og\x18\x07 \x01(\x02\x12\x0b\n\x03lng\x18\x08 \x01(\x02\x12\x0b\n\x03lat\x18\t \x01(\x02\"\x14\n\x03Obj\x12\r\n\x05ObjID\x18\x01 \x01(\x05\x32\x82\x01\n\x06ObjGen\x12-\n\x0cStartLoadObj\x12\x0e.SatelliteAddr\x1a\r.LoadResponse\x12\x1a\n\tGetObjPos\x12\x04.Obj\x1a\x07.ObjPos\x12-\n\nSendObjPos\x12\x07.ObjPos\x1a\x16.google.protobuf.Emptyb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cObjGen.proto\x1a\x1bgoogle/protobuf/empty.proto\"N\n\rSatelliteAddr\x12\x0e\n\x06sat_id\x18\x01 \x01(\x05\x12\x11\n\tsate_name\x18\x02 \x01(\t\x12\x0c\n\x04\x61\x64\x64r\x18\x03 \x01(\t\x12\x0c\n\x04port\x18\x04 \x01(\x05\"2\n\x0cLoadResponse\x12\x12\n\nsuccessful\x18\x01 \x01(\x08\x12\x0e\n\x06obj_id\x18\x02 \x01(\x05\"\x99\x01\n\x06ObjPos\x12\x0e\n\x06obj_id\x18\x01 \x01(\x05\x12\x11\n\ttimestamp\x18\x02 \x01(\t\x12\x12\n\ndelta_time\x18\x03 \x01(\x02\x12\x11\n\tdelta_lng\x18\x04 \x01(\x02\x12\x11\n\tdelta_lat\x18\x05 \x01(\x02\x12\x0b\n\x03sog\x18\x06 \x01(\x02\x12\x0b\n\x03\x63og\x18\x07 \x01(\x02\x12\x0b\n\x03lng\x18\x08 \x01(\x02\x12\x0b\n\x03lat\x18\t \x01(\x02\"\x15\n\x03Obj\x12\x0e\n\x06obj_id\x18\x01 \x01(\x05\x32\x82\x01\n\x06ObjGen\x12-\n\x0cStartLoadObj\x12\x0e.SatelliteAddr\x1a\r.LoadResponse\x12\x1a\n\tGetObjPos\x12\x04.Obj\x1a\x07.ObjPos\x12-\n\nSendObjPos\x12\x07.ObjPos\x1a\x16.google.protobuf.Emptyb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -23,13 +23,13 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   _globals['_SATELLITEADDR']._serialized_start=45
-  _globals['_SATELLITEADDR']._serialized_end=122
-  _globals['_LOADRESPONSE']._serialized_start=124
-  _globals['_LOADRESPONSE']._serialized_end=173
-  _globals['_OBJPOS']._serialized_start=176
-  _globals['_OBJPOS']._serialized_end=328
-  _globals['_OBJ']._serialized_start=330
-  _globals['_OBJ']._serialized_end=350
-  _globals['_OBJGEN']._serialized_start=353
-  _globals['_OBJGEN']._serialized_end=483
+  _globals['_SATELLITEADDR']._serialized_end=123
+  _globals['_LOADRESPONSE']._serialized_start=125
+  _globals['_LOADRESPONSE']._serialized_end=175
+  _globals['_OBJPOS']._serialized_start=178
+  _globals['_OBJPOS']._serialized_end=331
+  _globals['_OBJ']._serialized_start=333
+  _globals['_OBJ']._serialized_end=354
+  _globals['_OBJGEN']._serialized_start=357
+  _globals['_OBJGEN']._serialized_end=487
 # @@protoc_insertion_point(module_scope)

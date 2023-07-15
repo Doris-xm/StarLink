@@ -1,6 +1,7 @@
 import csv
 import datetime
 import multiprocessing
+from enum import Enum
 
 import numpy as np
 import requests
@@ -12,6 +13,13 @@ from obj_detect_server import Detect_obj
 
 tracking_length = 32
 input_length = 120
+
+
+class TARGET(Enum):
+    NOTFOUND = 0
+    FIND = 1
+    NEAR = 2
+
 
 class SatelliteInfo:
     def __init__(self, satellite_id, port):
@@ -25,7 +33,10 @@ class SatelliteInfo:
         self.obj_latitude = 0.0
         self.obj_longitude = 0.0
         self.obj_altitude = 0.0
-        self.obj_source_seq = []
+        #  正在跟踪的物体
+        self.obj_source_seq = {}
+        self.targets = {}
+        #   预测模型
         self.track_model = TrackModel()
         self.port = port
         self.detect_obj = Detect_obj(self.port)
@@ -35,7 +46,6 @@ class SatelliteInfo:
         self.daemon = multiprocessing.Process(target=self.detect_obj.run, args=(self.queue,))
         self.daemon.daemon = True  # 设置守护进程
         self.daemon.start()
-
 
     def fetch_data(self):
         response = requests.get(self.url)
@@ -49,50 +59,46 @@ class SatelliteInfo:
                 self.satellite_longitude = satellite["lng"]
                 self.satellite_altitude = satellite["alt"]
 
-    def predict_trajectory(self):
-        # curr_obj = self.get_object_info()  # ndarray： 121*7
-        # if curr_obj is None:
-        #     return None, []
+    def predict_trajectory(self, obj_name):
 
-        seq_len = len(self.obj_source_seq)
+        seq_len = len(self.obj_source_seq[obj_name])
 
         if seq_len > input_length:
-            self.obj_source_seq = self.obj_source_seq[seq_len - input_length:]
+            self.obj_source_seq[obj_name] = self.obj_source_seq[obj_name][seq_len - input_length:]
 
-        # self.obj_source_seq = np.array(self.obj_source_seq)  # 将列表转换为ndarray
         if seq_len < 5:
             return []
-        predict_results = self.track_model.predict(self.obj_source_seq, tracking_length)
+        predict_results = self.track_model.predict(self.obj_source_seq[obj_name], tracking_length)
         return predict_results
 
-    # def set_object_info(self, objID, delta_time, delta_lng, delta_lat, sog, cog, lng, lat):
-    #     self.obj_source_seq.append([delta_time, delta_lng, delta_lat, sog, cog, lng, lat])
-    #     seq_len = len(self.obj_source_seq)
-    #     # if seq_len == input_length:
-    #     #     self.detect_obj()
-    #
-    #     if seq_len > input_length:
-    #         self.obj_source_seq = self.obj_source_seq[seq_len - input_length:]
-    #         # self.detect_obj()
-    #     return len(self.obj_source_seq)
 
     def get_object_info(self):
         # 向检测模块请求当前目标的位置信息
         results = []
         try:
             while True:
-                results.append(self.queue.get_nowait())
-        except Exception as e: # nowait：队列为空时，会抛出异常Empty
+                result = self.queue.get_nowait()
+                objID = result[1]
+                results.append(result[0])
+        except Exception as e:  # nowait：队列为空时，会抛出异常Empty
             if results == []:
-                return None
-
-            results = np.concatenate(results, axis=0)
-            if self.obj_source_seq == []:
-                self.obj_source_seq = results
+                return None, None
+            #   获取当前位置
+            curr_obj = results[len(results) - 1][0]
+            # print("当前位置: ", curr_obj[0])
+            #   计算是否在观测范围内
+            find_target = self.calculate_azimuth([curr_obj[6], curr_obj[5]]) < 60.0
+            # find_target = True
+            self.targets[str(objID)] = TARGET.FIND
+            if find_target:
+                results = np.concatenate(results, axis=0)
+                if str(objID) not in self.obj_source_seq:
+                    self.obj_source_seq[str(objID)] = results
+                else:
+                    self.obj_source_seq[str(objID)] = np.concatenate((self.obj_source_seq[str(objID)], results), axis=0)
+                return results[len(results) - 1], str(objID)
             else:
-                self.obj_source_seq = np.concatenate((self.obj_source_seq, results), axis=0)
-            return results[len(results) - 1]
-
+                return None, None
 
     def set_pos(self, pos):
         self.obj_latitude = pos.lat
@@ -103,12 +109,23 @@ class SatelliteInfo:
         self.fetch_data()
         return self.satellite, self.stamp
 
+    # 增加新的观测目标
+    def add_new_target(self, obj_name, history_pos):
+        if obj_name not in self.targets or self.targets[obj_name] == TARGET.NOTFOUND:
+            self.targets[obj_name] = TARGET.NEAR
+            if history_pos is not None:
+                if obj_name not in self.obj_source_seq:
+                    self.obj_source_seq[obj_name] = history_pos
+                else:
+                    self.obj_source_seq[obj_name] = np.concatenate((self.obj_source_seq[obj_name], history_pos), axis=0)
+
+
     # 计算偏角, 返回角度
     def calculate_azimuth(self, obj_pos):
         self.fetch_data()  # 获取最新的卫星数据
         # self.detect_obj()  # 检测目标物位置
-        self.obj_latitude = obj_pos[6]
-        self.obj_longitude = obj_pos[5]
+        self.obj_latitude = obj_pos[0]
+        self.obj_longitude = obj_pos[1]
         self.obj_altitude = 0.0
 
         time_converter = TimeConverter(datetime.datetime.now())
@@ -140,12 +157,11 @@ class SatelliteInfo:
         delta_longitude = longitude_rad - obj_longitude_rad
 
         x = math.cos(math.radians(self.obj_latitude)) * math.sin(math.radians(self.satellite_latitude)) - math.sin(
-            math.radians(self.obj_latitude)) * math.cos(math.radians(self.satellite_latitude)) * math.cos(delta_longitude)
+            math.radians(self.obj_latitude)) * math.cos(math.radians(self.satellite_latitude)) * math.cos(
+            delta_longitude)
         y = math.sin(delta_longitude) * math.cos(math.radians(self.satellite_latitude))
         z = math.sin(math.radians(self.obj_latitude)) * math.sin(math.radians(self.satellite_latitude)) + math.cos(
-            math.radians(self.obj_latitude)) * math.cos(math.radians(self.satellite_latitude)) * math.cos(delta_longitude)
+            math.radians(self.obj_latitude)) * math.cos(math.radians(self.satellite_latitude)) * math.cos(
+            delta_longitude)
 
         return [x, y, z]
-
-
-

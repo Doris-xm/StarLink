@@ -33,7 +33,7 @@ class Detect_obj(ObjGen_pb2_grpc.ObjGenServicer):
         # print("obj server send obj pos", request)
         request_ndarray = np.array([[request.delta_time, request.delta_lng, request.delta_lat, request.sog,
                                      request.cog, request.lng, request.lat]])
-        self.queue.put(request_ndarray)
+        self.queue.put([request_ndarray, request.obj_id])
         # print("queue size", self.queue.empty())
         # if self.traj == []:
         #     self.traj = request_ndarray
