@@ -1,7 +1,7 @@
 import csv
 import datetime
 import multiprocessing
-
+import tensorflow as tf
 import numpy as np
 import requests
 import json
@@ -50,32 +50,29 @@ class SatelliteInfo:
                 self.satellite_altitude = satellite["alt"]
 
     def predict_trajectory(self):
-        curr_obj = self.get_object_info()  # ndarray： 121*7
-        if curr_obj is None:
-            return None, []
-        # self.obj_source_seq.append(location_info)  # list：1*121*7
 
         seq_len = len(self.obj_source_seq)
-
         if seq_len > input_length:
             self.obj_source_seq = self.obj_source_seq[seq_len - input_length:]
 
         # self.obj_source_seq = np.array(self.obj_source_seq)  # 将列表转换为ndarray
-        if seq_len < 5:
-            return curr_obj, []
+        if seq_len < 110:
+            return []
         predict_results = self.track_model.predict(self.obj_source_seq, tracking_length)
-        return curr_obj, predict_results
+        print(predict_results)
+        return predict_results
 
-    # def set_object_info(self, objID, delta_time, delta_lng, delta_lat, sog, cog, lng, lat):
-    #     self.obj_source_seq.append([delta_time, delta_lng, delta_lat, sog, cog, lng, lat])
-    #     seq_len = len(self.obj_source_seq)
-    #     # if seq_len == input_length:
-    #     #     self.detect_obj()
-    #
-    #     if seq_len > input_length:
-    #         self.obj_source_seq = self.obj_source_seq[seq_len - input_length:]
-    #         # self.detect_obj()
-    #     return len(self.obj_source_seq)
+
+    def set_object_info(self, objID, delta_time, delta_lng, delta_lat, sog, cog, lng, lat):
+        self.obj_source_seq.append([delta_time, delta_lng, delta_lat, sog, cog, lng, lat])
+        seq_len = len(self.obj_source_seq)
+        # if seq_len == input_length:
+        #     self.detect_obj()
+    
+        if seq_len > input_length:
+            self.obj_source_seq = self.obj_source_seq[seq_len - input_length:]
+            # self.detect_obj()
+        return len(self.obj_source_seq)
 
     def get_object_info(self):
         # 向检测模块请求当前目标的位置信息
@@ -92,6 +89,7 @@ class SatelliteInfo:
                 self.obj_source_seq = results
             else:
                 self.obj_source_seq = np.concatenate((self.obj_source_seq, results), axis=0)
+            
             return results[len(results) - 1]
 
 
