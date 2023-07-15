@@ -218,8 +218,8 @@ if __name__ == "__main__":
     for thread in threads:
         thread.join()
 
-# 单线程
-if __name__ == "__main__":
-    client = SatelliteClient(25544, ports[0])
-    print("Satellite client started ...")
-    client.run()
+# # 单线程
+# if __name__ == "__main__":
+#     client = SatelliteClient(25544, ports[0])
+#     print("Satellite client started ...")
+#     client.run()
