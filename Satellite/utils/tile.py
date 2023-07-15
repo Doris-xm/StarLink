@@ -225,7 +225,7 @@ def addTimestamp(imagebytse):
     image = Image.open(io.BytesIO(imagebytse))
     width, height = image.size
     draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype('arial.ttf', 40)
+    font = ImageFont.truetype('Gubbi', 40)
     current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     print(current_time)
     text_width, text_height = draw.textsize(current_time, font)
@@ -235,7 +235,7 @@ def addTimestamp(imagebytse):
     # yellow
     text_color = (255, 255, 0)
 
-    draw.text((x, y), current_time, text_color, font=font)
+    draw.text((x, y), current_time, text_color)
     modified_image = io.BytesIO()
     image.save(modified_image, format='PNG')
     return modified_image.getvalue()
@@ -245,4 +245,3 @@ if __name__ == '__main__':
     for img in img_store:
         with open (img[0], 'wb') as f:
             f.write(img[1])
-    

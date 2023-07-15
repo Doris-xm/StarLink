@@ -40,9 +40,9 @@ class SatelliteClient:
             ('grpc.initial_reconnect_backoff_ms', 5000)
         ]
         # 创建通道和存根
-        # self.channel = grpc.insecure_channel("localhost:50051", options=channel_options)
+        self.channel = grpc.insecure_channel("localhost:50051", options=channel_options)
         # self.channel = grpc.insecure_channel("47.115.214.51:50051", options=channel_options)
-        self.channel = grpc.insecure_channel("43.142.83.201:50051", options=channel_options)
+        # self.channel = grpc.insecure_channel("43.142.83.201:50051", options=channel_options)
         self.stub = SatCom_pb2_grpc.SatComStub(self.channel)
 
     def disconnect(self):
@@ -73,14 +73,14 @@ class SatelliteClient:
                 find_target=False,
             )
 
-        print ("curr_obj", curr_obj)
+        # print ("curr_obj", curr_obj)
 
         #   判断是否在监控范围内
         # find_target = self.satellite.calculate_azimuth(curr_obj) < 60.0
         # 随便加的经纬度约束
-        if abs(info["lat"] - curr_obj[2]) > 40.0:
+        if abs(info["lat"] - curr_obj[6]) > 45.0:
             find_target = False
-        if abs(info["lng"] - curr_obj[3]) > 40.0:
+        if abs(info["lng"] - curr_obj[5]) > 45.0:
 
             find_target = False
         if find_target:
@@ -131,7 +131,7 @@ class SatelliteClient:
                 for predict_res in predict_results
             ]
         )
-        print(request)
+        # print(request)
         return request
 
     def generate_requests(self):
