@@ -72,29 +72,30 @@ class ObjDetect(ObjGen_pb2_grpc.ObjGenServicer):
                            ('grpc.keepalive_permit_without_calls', 1),
                            ('grpc.initial_reconnect_backoff_ms', 50000)  # 设置初始重连等待时间为5秒
                            ]
-        for i in range(len(seq)):
-            ObjInfo = ObjGen_pb2.ObjPos()
-            ObjInfo.ObjID = self.objID
-            print(seq[i])
-            ObjInfo.delta_time = seq[i, 0]
-            ObjInfo.delta_lng = seq[i, 1]
-            ObjInfo.delta_lat = seq[i, 2]
-            ObjInfo.sog = seq[i, 3]
-            ObjInfo.cog = seq[i, 4]
-            ObjInfo.lng = seq[i, 5]
-            ObjInfo.lat = seq[i, 6]
-            for port in ports:  # 依次向各个端口发送
-                try:
-                    with grpc.insecure_channel(self.addr + ":" + port, channel_options) as channel:
-                        stub = ObjGen_pb2_grpc.ObjGenStub(channel)
-                        stub.SendObjPos(ObjInfo)    # 不等待返回
-                except Exception as e:
-                    # print(e)
-                    continue
+        while True:
+            for i in range(len(seq)):
+                ObjInfo = ObjGen_pb2.ObjPos()
+                ObjInfo.ObjID = self.objID
+                print(seq[i])
+                ObjInfo.delta_time = seq[i, 0]
+                ObjInfo.delta_lng = seq[i, 1]
+                ObjInfo.delta_lat = seq[i, 2]
+                ObjInfo.sog = seq[i, 3]
+                ObjInfo.cog = seq[i, 4]
+                ObjInfo.lng = seq[i, 5]
+                ObjInfo.lat = seq[i, 6]
+                for port in ports:  # 依次向各个端口发送
+                    try:
+                        with grpc.insecure_channel(self.addr + ":" + port, channel_options) as channel:
+                            stub = ObjGen_pb2_grpc.ObjGenStub(channel)
+                            stub.SendObjPos(ObjInfo)    # 不等待返回
+                    except Exception as e:
+                        # print(e)
+                        continue
 
-            sleep(0.1)
-            if i >= 120:
-                sleep(5)
+                sleep(0.1)
+                if i >= 120:
+                    sleep(5)
 
 class ObjectLoader():
     def row2array(self, row):
