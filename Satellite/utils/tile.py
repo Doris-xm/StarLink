@@ -205,14 +205,16 @@ def getTile(x1, y1, x2, y2, z = 16, source='amap'):
 
 def getPhoto(x1, y1):
     img_store = []
-    if x1 == 31.15762 and y1 == 121.7862:
+    if abs(x1 - 31.15762) < 0.5 and abs(y1 - 121.7862) < 0.5:
         dir = 'utils/pd'
-    elif x1 == 23.38957 and y1 == 113.2979:
+    elif abs(x1 - 23.38957) < 0.5 and abs(y1 - 113.2979) < 0.5:
         dir = 'utils/by'
-    elif x1 == 40.64318 and y1 == -72.22293:
+    elif abs(x1 - 40.64318) < 0.5 and abs(y1 - -72.22293) < 0.5:
         dir = 'utils/knd'
-    elif x1 == 38.32444 and y1 == 106.3794:
+    elif abs(x1 - 38.32444) < 0.5 and abs(y1 - 106.3794) < 0.5:
         dir = 'utils/hd'
+    elif abs(x1 - 19.943456) < 0.5 and abs(y1 - 110.465511) < 0.5:
+        dir = 'utils/ml'
     # get all photos from direction dir
     for root, dirs, files in os.walk(dir):
         # store img in a tuple

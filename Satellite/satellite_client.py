@@ -29,6 +29,7 @@ class SatelliteClient:
         self.by = getPhoto(23.38957, 113.2979)
         self.knd = getPhoto(40.64318, -72.22293)
         self.hd = getPhoto(38.32444, 106.3794)
+        self.ml = getPhoto(19.94346, 110.45123)
 
     def connect(self):
         print("Trying to connect ...")
@@ -154,6 +155,8 @@ class SatelliteClient:
             tile = self.knd[self.cnt][1]
         elif abs(y1 - 38.32444) < 0.5 and abs(x1 - 106.3794) < 0.5:
             tile = self.hd[self.cnt][1]
+        elif abs(y1 - 19.94346) < 0.5 and abs(x1 - 110.45123) < 0.5:
+            tile = self.ml[self.cnt][1]
         else:
             tile = getTile(x1, y1, x2, y2) 
         tile = addTimestamp(tile)
