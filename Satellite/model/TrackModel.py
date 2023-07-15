@@ -1,6 +1,6 @@
 import tensorflow as tf
 import numpy as np
-import model.Model as Model
+from . import Model as Model
 import csv
 
 n_lstm = 128
@@ -28,19 +28,25 @@ class TrackModel:
         """
         sequence = np.array(sequence)
         source_seq, max_seq_data, min_seq_data = self.preprocess(sequence)
-        print("predicting")
         pred = []
         decoder_length = pred_len
         encode_length = source_seq.shape[1]
+        # print("length in", source_seq.shape())
 
         encode_seq = source_seq[:, :encode_length - 1, :]
         # Encode the source.
-        encoder_outputs = self.Encoder(encode_seq)
+        try:
+            encoder_outputs = self.Encoder(encode_seq)
+        except Exception as e:
+            print(e)
+
         states = encoder_outputs[1:]
         history = encoder_outputs[0]
+
         # Decoder predicts the target_seq. decoder_in shape of [batch_size, 1, 5]
         decoder_in = tf.expand_dims(source_seq[:, -1], 1)
         # print(decoder_in)
+
         for t in range(decoder_length):
             logit, lstm_out, de_state_h, de_state_c, _= self.DecoderAttention(decoder_in, states, history)
             # logit shape of [batch_size, 5]
@@ -51,7 +57,7 @@ class TrackModel:
             pred.append(logit[0, :])
 
         pred = np.array(pred)
-
+        
         pred_result = self.cal_position(pred, max_seq_data, min_seq_data, sequence[-1, 5], sequence[-1, 6])
         # print(pred_result)
         return pred_result
@@ -65,7 +71,8 @@ class TrackModel:
         seq_reshape = []
         seq_reshape.append(sequence)
         seq_encode = np.array(seq_reshape)[:, :, :5]
-        # print(seq_encode.shape)
+        print(seq_encode.shape)
+        print(type(seq_encode))
 
         return seq_encode, max_seq_data, min_seq_data
     
@@ -137,4 +144,5 @@ if __name__ == '__main__':
                 break
     
     model = TrackModel()
+    print(type(seq_temp))
     model.predict(seq_temp, 20)

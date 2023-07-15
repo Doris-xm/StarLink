@@ -11,6 +11,10 @@ from gRPC.Ports import ports
 
 import threading
 
+import multiprocessing
+
+import sys
+
 class SatelliteClient:
     def __init__(self, sat_id, port):
         self.sat_id = sat_id
@@ -41,10 +45,12 @@ class SatelliteClient:
         self.stub = None
 
     def generate_request(self):
+        find_target = True
         info, stamp = self.satellite.get_satellite_info()
-        #   获取当前物体位置
+
         curr_obj = self.satellite.get_object_info()
         # 当前没有目标
+        predict_results = []
         if curr_obj is None:
             return SatCom_pb2.SatRequest(
                 sat_info=SatCom_pb2.SatelliteInfo(
@@ -62,12 +68,13 @@ class SatelliteClient:
         print ("curr_obj", curr_obj)
 
         #   判断是否在监控范围内
-        find_target = self.satellite.calculate_azimuth(curr_obj) < 60.0
+        # find_target = self.satellite.calculate_azimuth(curr_obj) < 60.0
         # 随便加的经纬度约束
-        # if abs(info["lat"] - curr_obj[2]) > 10.0:
-        #     find_target = False
-        # if abs(info["lng"] - curr_obj[3]) > 10.0:
-        #     find_target = False
+        if abs(info["lat"] - curr_obj[2]) > 40.0:
+            find_target = False
+        if abs(info["lng"] - curr_obj[3]) > 40.0:
+
+            find_target = False
         if find_target:
             print(info["name"] + " find target!")
             #   获取预测轨迹
@@ -164,8 +171,9 @@ class SatelliteClient:
                 response_iterator = self.stub.CommuWizSat(request)
 
                 print("Satellite client received: ")
-                # for response in response_iterator:
-                #     print(response)
+                for response in response_iterator:
+                    pass
+                    # print(response)
                     # if response.take_photo:
                     #     zones = response.zone
                     #     for zone in zones:
@@ -173,7 +181,7 @@ class SatelliteClient:
                     #         self.stub.TakePhotos(request)
 
                 # 添加间隔时间
-                sleep(5)  # 在每次请求之后等待 5 秒
+                sleep(0.3)  # 在每次请求之后等待 5 秒
 
             except grpc.RpcError as e:
                 print(e)
@@ -181,6 +189,7 @@ class SatelliteClient:
                 # 断开与服务器的连接
                 self.disconnect()
                 continue
+
 
 
 IDs = [
@@ -207,19 +216,11 @@ class SatelliteClientThread(threading.Thread):
 
 
 if __name__ == "__main__":
-    # 创建并启动多个线程
-    threads = []
-    for i in range(len(IDs)):
-        thread = SatelliteClientThread(IDs[i], ports[i])
-        threads.append(thread)
-        thread.start()
-
-    # 等待所有线程完成
-    for thread in threads:
-        thread.join()
-
-# # 单线程
-# if __name__ == "__main__":
-#     client = SatelliteClient(25544, ports[0])
-#     print("Satellite client started ...")
-#     client.run()
+    if len(sys.argv) != 2:
+        print("usage: satellite_client, num")
+        exit(1)
+    
+    num = int(sys.argv[1])
+    sat = SatelliteClient(IDs[num], ports[num])
+    
+    sat.run()
