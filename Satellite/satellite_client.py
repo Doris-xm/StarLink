@@ -6,8 +6,10 @@ import os
 from protos import SatCom_pb2
 from protos import SatCom_pb2_grpc
 from satellite import SatelliteInfo
-from utils.tile import getTile
+
 from gRPC.Ports import ports
+from utils.tile import getTile, getPhoto, addTimestamp
+from detect import ObjectDetector
 
 import threading
 
@@ -21,6 +23,12 @@ class SatelliteClient:
         self.satellite = SatelliteInfo(sat_id, port)
         self.channel = None  # 保存通道对象
         self.stub = None  # 保存存根对象
+        self.detector = ObjectDetector()
+        self.cnt = 0
+        self.pd = getPhoto(31.15762, 121.7862)
+        self.by = getPhoto(23.38957, 113.2979)
+        self.knd = getPhoto(40.64318, -72.22293)
+        self.hd = getPhoto(38.32444, 106.3794)
 
     def connect(self):
         print("Trying to connect ...")
@@ -33,8 +41,8 @@ class SatelliteClient:
         ]
         # 创建通道和存根
         # self.channel = grpc.insecure_channel("localhost:50051", options=channel_options)
-        self.channel = grpc.insecure_channel("43.142.83.201:50051", options=channel_options)
         # self.channel = grpc.insecure_channel("47.115.214.51:50051", options=channel_options)
+        self.channel = grpc.insecure_channel("43.142.83.201:50051", options=channel_options)
         self.stub = SatCom_pb2_grpc.SatComStub(self.channel)
 
     def disconnect(self):
@@ -132,22 +140,26 @@ class SatelliteClient:
         ]
         for request in requests:
             yield request
-
+    
     def generate_photo_request(self, zone):
-        x1 = zone.upper_left.lat
-        y1 = zone.upper_left.lng
-        x2 = zone.bottom_right.lat
-        y2 = zone.bottom_right.lng
-        tile = getTile(x1, y1, x2, y2)
+        x1 = zone.upper_left.lng
+        y1 = zone.upper_left.lat
+        x2 = zone.bottom_right.lng
+        y2 = zone.bottom_right.lat
+        if abs(y1 - 31.15762) < 0.5 and abs(x1 - 121.7862) < 0.5:
+            tile = self.pd[self.cnt][1]
+        elif abs(y1 - 23.38957) < 0.5 and abs(x1 - 113.2979) < 0.5:
+            tile = self.by[self.cnt][1]
+        elif abs(y1 - 40.64318) < 0.5 and abs(x1 - -72.22293) < 0.5:
+            tile = self.knd[self.cnt][1]
+        elif abs(y1 - 38.32444) < 0.5 and abs(x1 - 106.3794) < 0.5:
+            tile = self.hd[self.cnt][1]
+        else:
+            tile = getTile(x1, y1, x2, y2) 
+        tile = addTimestamp(tile)
+        
         if zone.request_identify:
-            with open('tile.jpg', 'wb') as f:
-                f.write(tile)
-            self.detector.detect()
-            with open('./models/output/tile.jpg', 'rb') as f:
-                tile = f.read()
-            # delete both files
-            os.remove('tile.jpg')
-            os.remove('./models/output/tile.jpg')
+            tile = self.detector.detect(tile)
         sat_photo_request = SatCom_pb2.SatPhotoRequest(
             timestamp = str(self.satellite.get_satellite_info()[1]), # 获取时间戳
             zone = zone,
@@ -170,16 +182,16 @@ class SatelliteClient:
                 request = self.generate_requests()
                 response_iterator = self.stub.CommuWizSat(request)
 
-                print("Satellite client received: ")
+                print("Satellite client received resposne!")
                 for response in response_iterator:
-                    pass
-                    # print(response)
-                    # if response.take_photo:
-                    #     zones = response.zone
-                    #     for zone in zones:
-                    #         request = self.generate_photo_request(zone)
-                    #         self.stub.TakePhotos(request)
-
+                    if response.take_photo and self.sat_id == 25544:
+                        self.cnt += 1
+                        if self.cnt > 5:
+                            self.cnt = 0
+                        zones = response.zone
+                        for zone in zones:
+                            request = self.generate_photo_request(zone)
+                            self.stub.TakePhotos(request)
                 # 添加间隔时间
                 sleep(0.3)  # 在每次请求之后等待 5 秒
 
@@ -224,3 +236,8 @@ if __name__ == "__main__":
     sat = SatelliteClient(IDs[num], ports[num])
     
     sat.run()
+
+
+# if __name__ == "__main__":
+#     client = SatelliteClient(25544)
+#     client.run()
