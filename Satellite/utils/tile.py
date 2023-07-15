@@ -2,6 +2,8 @@ from math import floor, pi, log, tan, atan, exp
 from threading import Thread, Lock
 import urllib.request as ur
 import PIL.Image as pil
+from PIL import Image, ImageDraw, ImageFont
+import datetime
 import io
 import os
 
@@ -218,6 +220,25 @@ def getPhoto(x1, y1):
             with open(os.path.join(root, file), 'rb') as f:
                 img_store.append((file, f.read()))
     return img_store
+
+def addTimestamp(imagebytse):
+    image = Image.open(io.BytesIO(imagebytse))
+    width, height = image.size
+    draw = ImageDraw.Draw(image)
+    font = ImageFont.truetype('arial.ttf', 40)
+    current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    print(current_time)
+    text_width, text_height = draw.textsize(current_time, font)
+    margin = 10
+    x = margin
+    y = margin
+    # yellow
+    text_color = (255, 255, 0)
+
+    draw.text((x, y), current_time, text_color, font=font)
+    modified_image = io.BytesIO()
+    image.save(modified_image, format='PNG')
+    return modified_image.getvalue()
 
 if __name__ == '__main__':
     img_store = getPhoto(31.15762, 121.7862)

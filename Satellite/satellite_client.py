@@ -6,7 +6,7 @@ import os
 from protos import SatCom_pb2
 from protos import SatCom_pb2_grpc
 from satellite import SatelliteInfo
-from utils.tile import getTile, getPhoto
+from utils.tile import getTile, getPhoto, addTimestamp
 from detect import ObjectDetector
 
 import threading
@@ -112,8 +112,8 @@ class SatelliteClient:
             tile = self.hd[self.cnt][1]
         else:
             tile = getTile(x1, y1, x2, y2) 
-
-
+        tile = addTimestamp(tile)
+        
         if zone.request_identify:
             tile = self.detector.detect(tile)
         sat_photo_request = SatCom_pb2.SatPhotoRequest(
@@ -149,7 +149,7 @@ class SatelliteClient:
                             request = self.generate_photo_request(zone)
                             self.stub.TakePhotos(request)
                 # 添加间隔时间
-                sleep(5)  # 在每次请求之后等待 5 秒
+                sleep(2)  # 在每次请求之后等待 5 秒
 
             except grpc.RpcError as e:
                 print(e)
