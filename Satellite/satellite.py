@@ -50,10 +50,9 @@ class SatelliteInfo:
                 self.satellite_altitude = satellite["alt"]
 
     def predict_trajectory(self):
-        curr_obj = self.get_object_info()  # ndarray： 121*7
-        if curr_obj is None:
-            return None, []
-        # self.obj_source_seq.append(location_info)  # list：1*121*7
+        # curr_obj = self.get_object_info()  # ndarray： 121*7
+        # if curr_obj is None:
+        #     return None, []
 
         seq_len = len(self.obj_source_seq)
 
@@ -62,9 +61,9 @@ class SatelliteInfo:
 
         # self.obj_source_seq = np.array(self.obj_source_seq)  # 将列表转换为ndarray
         if seq_len < 5:
-            return curr_obj, []
+            return []
         predict_results = self.track_model.predict(self.obj_source_seq, tracking_length)
-        return curr_obj, predict_results
+        return predict_results
 
     # def set_object_info(self, objID, delta_time, delta_lng, delta_lat, sog, cog, lng, lat):
     #     self.obj_source_seq.append([delta_time, delta_lng, delta_lat, sog, cog, lng, lat])
@@ -105,9 +104,12 @@ class SatelliteInfo:
         return self.satellite, self.stamp
 
     # 计算偏角, 返回角度
-    def calculate_azimuth(self):
+    def calculate_azimuth(self, obj_pos):
         self.fetch_data()  # 获取最新的卫星数据
         # self.detect_obj()  # 检测目标物位置
+        self.obj_latitude = obj_pos[6]
+        self.obj_longitude = obj_pos[5]
+        self.obj_altitude = 0.0
 
         time_converter = TimeConverter(datetime.datetime.now())
 

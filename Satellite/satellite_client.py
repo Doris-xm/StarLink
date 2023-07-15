@@ -28,8 +28,9 @@ class SatelliteClient:
             ('grpc.initial_reconnect_backoff_ms', 5000)
         ]
         # 创建通道和存根
-        self.channel = grpc.insecure_channel("localhost:50051", options=channel_options)
-        # self.channel = grpc.insecure_channel("43.142.83.201:50051", options=channel_options)
+        # self.channel = grpc.insecure_channel("localhost:50051", options=channel_options)
+        self.channel = grpc.insecure_channel("43.142.83.201:50051", options=channel_options)
+        # self.channel = grpc.insecure_channel("47.115.214.51:50051", options=channel_options)
         self.stub = SatCom_pb2_grpc.SatComStub(self.channel)
 
     def disconnect(self):
@@ -41,11 +42,12 @@ class SatelliteClient:
 
     def generate_request(self):
         info, stamp = self.satellite.get_satellite_info()
-        curr_obj, predict_results = self.satellite.predict_trajectory()
+        #   获取当前物体位置
+        curr_obj = self.satellite.get_object_info()
         # 当前没有目标
         if curr_obj is None:
             return SatCom_pb2.SatRequest(
-            sat_info=SatCom_pb2.SatelliteInfo(
+                sat_info=SatCom_pb2.SatelliteInfo(
                     sat_name=info["name"],
                     sat_position=SatCom_pb2.LLAPosition(
                         timestamp=str(stamp),
@@ -57,17 +59,29 @@ class SatelliteClient:
                 find_target=False,
             )
 
+        print ("curr_obj", curr_obj)
 
-        # timestamp_ = int(curr_obj[1])
-        timestamp_ = str(stamp)  #TODO:物体时间戳怎么确定？
-        find_target = self.satellite.calculate_azimuth() < 60.0
+        #   判断是否在监控范围内
+        find_target = self.satellite.calculate_azimuth(curr_obj) < 60.0
         # 随便加的经纬度约束
         # if abs(info["lat"] - curr_obj[2]) > 10.0:
         #     find_target = False
         # if abs(info["lng"] - curr_obj[3]) > 10.0:
         #     find_target = False
         if find_target:
-            print(info["name"]+" find target!")
+            print(info["name"] + " find target!")
+            #   获取预测轨迹
+            predict_results = self.satellite.predict_trajectory()
+            print("predict_results", len(predict_results))
+
+            stamp_tmp = stamp
+            for predict_res in predict_results:
+                stamp_tmp += 1
+                predict_res.append(stamp_tmp)
+
+        else:
+            predict_results = []
+
         request = SatCom_pb2.SatRequest(
             sat_info=SatCom_pb2.SatelliteInfo(
                 sat_name=info["name"],
@@ -79,12 +93,11 @@ class SatelliteClient:
                 )
             ),
             find_target=find_target,
-            # find_target=True,
             target_info=[
                 SatCom_pb2.TargetInfo(
                     target_name="test obj",
                     target_position=SatCom_pb2.LLAPosition(
-                        timestamp=timestamp_,
+                        timestamp=str(stamp),
                         alt=0,
                         lat=curr_obj[6],
                         lng=curr_obj[5],
@@ -92,9 +105,9 @@ class SatelliteClient:
                 )
             ] + [
                 SatCom_pb2.TargetInfo(
-                    target_name="test obj's predict",
+                    target_name="test obj",
                     target_position=SatCom_pb2.LLAPosition(
-                        timestamp=str(stamp++1),
+                        timestamp=str(predict_res[2]),
                         alt=0,
                         lat=predict_res[0],
                         lng=predict_res[1],
@@ -103,7 +116,7 @@ class SatelliteClient:
                 for predict_res in predict_results
             ]
         )
-
+        print(request)
         return request
 
     def generate_requests(self):
@@ -151,8 +164,8 @@ class SatelliteClient:
                 response_iterator = self.stub.CommuWizSat(request)
 
                 print("Satellite client received: ")
-                for response in response_iterator:
-                    print(response)
+                # for response in response_iterator:
+                #     print(response)
                     # if response.take_photo:
                     #     zones = response.zone
                     #     for zone in zones:
@@ -205,8 +218,8 @@ if __name__ == "__main__":
     for thread in threads:
         thread.join()
 
-# 单进程
-# if __name__ == "__main__":
-#     client = SatelliteClient(25544, ports[0])
-#     print("Satellite client started ...")
-#     client.run()
+# 单线程
+if __name__ == "__main__":
+    client = SatelliteClient(25544, ports[0])
+    print("Satellite client started ...")
+    client.run()

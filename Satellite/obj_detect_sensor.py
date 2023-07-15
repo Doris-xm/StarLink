@@ -89,12 +89,12 @@ class ObjDetect(ObjGen_pb2_grpc.ObjGenServicer):
                         stub = ObjGen_pb2_grpc.ObjGenStub(channel)
                         stub.SendObjPos(ObjInfo)    # 不等待返回
                 except Exception as e:
-                    print(e)
+                    # print(e)
                     continue
 
-            sleep(1)
+            sleep(0.1)
             if i >= 120:
-                sleep(10)
+                sleep(5)
 
 class ObjectLoader():
     def row2array(self, row):
