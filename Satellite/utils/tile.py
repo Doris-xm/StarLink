@@ -3,6 +3,7 @@ from threading import Thread, Lock
 import urllib.request as ur
 import PIL.Image as pil
 import io
+import os
 
 MAP_URLS = {
     "google": "http://mt2.google.cn/vt/lyrs={style}&hl=zh-CN&gl=CN&src=app&x={x}&y={y}&z={z}",
@@ -163,12 +164,20 @@ def testTile(x1, y1, x2, y2, z, source='google', outfile="MAP_OUT.png", style='s
     outpic.save(outfile)
     print('Exported to file!')
     return {"LT":(pos1x,pos1y),"RT":(pos2x,pos1y),"LB":(pos1x,pos2y),"RB":(pos2x,pos2y),"z":z}
+    
 
 def getTile(x1, y1, x2, y2, z = 16, source='amap'):
     pos1x, pos1y = wgs84_to_tile(x1, y1, z)
     pos2x, pos2y = wgs84_to_tile(x2, y2, z)
     lenx = pos2x - pos1x + 1
     leny = pos2y - pos1y + 1
+    while lenx * leny > 20:
+        z -= 1
+        pos1x, pos1y = wgs84_to_tile(x1, y1, z)
+        pos2x, pos2y = wgs84_to_tile(x2, y2, z)
+        lenx = pos2x - pos1x + 1
+        leny = pos2y - pos1y + 1
+
     print("Total number: {x} X {y}".format(x=lenx, y=leny))
 
     urls = [geturl(source, i, j, z) for j in range(pos1y, pos1y + leny) for i in range(pos1x, pos1x + lenx)]
@@ -192,6 +201,27 @@ def getTile(x1, y1, x2, y2, z = 16, source='amap'):
 
     return image_data
 
+def getPhoto(x1, y1):
+    img_store = []
+    if x1 == 31.15762 and y1 == 121.7862:
+        dir = 'utils/pd'
+    elif x1 == 23.38957 and y1 == 113.2979:
+        dir = 'utils/by'
+    elif x1 == 40.64318 and y1 == -72.22293:
+        dir = 'utils/knd'
+    elif x1 == 38.32444 and y1 == 106.3794:
+        dir = 'utils/hd'
+    # get all photos from direction dir
+    for root, dirs, files in os.walk(dir):
+        # store img in a tuple
+        for file in files:
+            with open(os.path.join(root, file), 'rb') as f:
+                img_store.append((file, f.read()))
+    return img_store
 
 if __name__ == '__main__':
-    x = testTile(121.78518, 31.18397, 121.80518, 31.13397, 17, source='amap', outfile="merge.jpg")
+    img_store = getPhoto(31.15762, 121.7862)
+    for img in img_store:
+        with open (img[0], 'wb') as f:
+            f.write(img[1])
+    

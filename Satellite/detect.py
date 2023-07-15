@@ -64,7 +64,8 @@ class ObjectDetector:
 
         # Get names and colors
         names = model.module.names if hasattr(model, 'module') else model.names
-        colors = [[random.randint(0, 255) for _ in range(3)] for _ in range(len(names))]
+        # set color red
+        colors = [[255, 0, 0] for _ in range(len(names))]
 
         # Run inference
         t0 = time.time()
